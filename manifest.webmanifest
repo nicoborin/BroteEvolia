@@ -5,7 +5,7 @@
   "lang": "es-AR",
   "start_url": "./",
   "scope": "./",
-  "id": "./",
+  "id": "evolia",
   "display": "standalone",
   "background_color": "#f4f4f5",
   "theme_color": "#2F3A8F",
