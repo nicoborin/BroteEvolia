@@ -1,5 +1,6 @@
-/* Evolia · service worker. Al publicar una versión nueva, subí el número de CACHE. */
-const CACHE = "evolia-v3.8-1";
+/* Evolia · service worker. Al publicar una versión nueva, subí el número de CACHE.
+   Solo borra cachés propias ("evolia-"): comparte el dominio con otras apps. */
+const CACHE = "evolia-v3.8-2";
 const SHELL = [
   "./",
   "./index.html",
@@ -17,7 +18,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("evolia-") && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
