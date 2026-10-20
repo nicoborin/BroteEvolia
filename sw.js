@@ -1,6 +1,6 @@
 /* Evolia · service worker. Al publicar una versión nueva, subí el número de CACHE.
    Solo borra cachés propias ("evolia-"): comparte el dominio con otras apps. */
-const CACHE = "evolia-v3.8-2";
+const CACHE = "evolia-v3.9-1";
 const SHELL = [
   "./",
   "./index.html",
