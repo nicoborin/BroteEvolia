@@ -604,7 +604,7 @@ var RIESGO_MEDIO = ["Consumo social de alcohol.","Vapeo ocasional.","Cannabis: c
   "Hace más de 2 años.","Sin controles previos.","No recibe."];
 /* excepciones por campo: mismo texto, distinto color según el campo */
 var TL_NADA = "No realiza actividades extras.";
-var RIESGO_CAMPO = {};
+var RIESGO_CAMPO = {dismenorrea:{"Moderada.":" medio","Severa.":" alto"}};
 /* une textos de tiempo libre; "No realiza." solo queda si no hay nada más */
 var REL_COMP = "Buena relación con compañeros.", REL_DOC = "Buena relación con docentes.",
     REL_AMBOS = "Buena relación con docentes y compañeros.";
@@ -678,6 +678,7 @@ var CHIPS = {
   irs:["Niega.","Sí."],
   mac:["No requiere.","No usa ningún método.","No usa método de barrera.","Sabe de AHE.","Preservativo.","Implante subdérmico.","Anticonceptivo oral.","Inyectable mensual.",
     "Inyectable trimestral.","DIU.","Se ofrece consejería."],
+  dismenorrea:["Niega.","Leve.","Moderada.","Severa."],
   alimentacion:["Hace las 4 comidas.","No hace las 4 comidas.","Verduras, carnes, lácteos y frutas.",
     "Se saltea el desayuno.","No come verduras.","No come carne.","Prioriza el consumo de harinas.",
     "Comida chatarra.","Jugos y gaseosas.","No repite."],
@@ -1485,7 +1486,8 @@ var CONDUCTA_PA = {
 function avisos(){
   var a = [], t = String(F.animo||""), m = String(F.mac||""), tx = String(F.toxicos||""), rd = String(F.redes||"");
   if(/Refiere ideas de muerte|Autolesiones/i.test(t))
-    a.push("Riesgo en salud mental: valorar interconsulta con Salud Mental y pautas de alarma escritas.");
+    a.push(smSeguimiento() ? "Riesgo en salud mental, en seguimiento por Salud Mental: dejar pautas de alarma escritas."
+                           : "Riesgo en salud mental: valorar interconsulta con Salud Mental y pautas de alarma escritas.");
   if(/Síntomas compatibles con depresión|Crisis de angustia/i.test(t))
     a.push("Sintomatología afectiva referida: dejar asentada la evaluación de riesgo.");
   if(/^S[ií]\.?$/i.test(String(F.irs||"").trim()) && sinMetodo())
@@ -1504,6 +1506,7 @@ function avisos(){
   return a;
 }
 
+function smSeguimiento(){ return /En seguimiento por Salud Mental/i.test(String(F.animo||"")); }
 function chipsDx(){
   var a = antro(), esF = F.sexo==="F";
   var l = [esF?"Adolescente sana.":"Adolescente sano.","Control de salud."];
@@ -1523,13 +1526,13 @@ function chipsDx(){
     else if(/limítrofe/.test(pa.cat)) l.push("Registro de PA limítrofe, a controlar.");
   }
   var an = String(F.animo||"");
-  if(/Refiere ideas de muerte/i.test(an)) l.unshift("Ideas de muerte a evaluar por Salud Mental.");
-  if(/Autolesiones/i.test(an)) l.unshift("Autolesiones a evaluar por Salud Mental.");
+  if(/Refiere ideas de muerte/i.test(an)) l.unshift(smSeguimiento() ? "Ideas de muerte." : "Ideas de muerte a evaluar por Salud Mental.");
+  if(/Autolesiones/i.test(an)) l.unshift(smSeguimiento() ? "Autolesiones." : "Autolesiones a evaluar por Salud Mental.");
   if(String(F.nbi||"").replace("Niega.","").trim()) l.push("Situación de vulnerabilidad social.");
   if(trabajoMenor16() && String(F.trabajo||"").replace("No trabaja.","").trim()) l.push("Trabajo infantil.");
   if(F.escEstado==="Abandonó") l.push("Deserción escolar.");
   var t = String(F.animo||"");
-  if(/Síntomas compatibles con depresión/i.test(t)) l.unshift("Síntomas depresivos a evaluar por Salud Mental.");
+  if(/Síntomas compatibles con depresión/i.test(t)) l.unshift(smSeguimiento() ? "Síntomas depresivos." : "Síntomas depresivos a evaluar por Salud Mental.");
   if(/Crisis de angustia|Síntomas de ansiedad/i.test(t)) l.unshift("Crisis de angustia. Sintomatología ansiosa.");
   if(txCEEA()) l.push("Consumo episódico excesivo de alcohol.");
   TX.forEach(function(s){
@@ -1545,6 +1548,9 @@ function chipsDx(){
   if(/Anemia hipocrómica microcítica/i.test(lb)) l.push("Anemia ferropénica a confirmar.");
   if(/Perfil tiroideo alterado/i.test(lb)) l.push("Alteración del perfil tiroideo a estudiar.");
   if(esF && /5 o más toallitas/i.test(String(F.gm||""))) l.push("Sangrado menstrual abundante.");
+  var dmn = String(F.dismenorrea||"");
+  if(esF && /sever/i.test(dmn)) l.push("Dismenorrea severa.");
+  else if(esF && /moderad/i.test(dmn)) l.push("Dismenorrea moderada.");
   if(!esF){
     var ur = String(F.urologico||"");
     [["Varicocele","Varicocele izquierdo."],["Hidrocele","Hidrocele."],["Criptorquidia","Criptorquidia."],
@@ -1838,7 +1844,7 @@ var DEST_AUTO = {
   toxicos: function(){ return txCEEA() || txSemanal().length>0 || txProb().length>0 || txSoledad().length>0 || txConsume("Thc") || /Cannabis/i.test(String(F.toxicos||"")); },
   redes: function(){ return /Apuestas online: refiere/i.test(String(F.redes||"")); },
   animo: function(){ return /Autolesiones|Refiere ideas de muerte|Síntomas compatibles con depresión|Crisis de angustia|Síntomas de ansiedad/i.test(String(F.animo||"")); },
-  ginec: function(){ return F.sexo==="F" && (lecturaFem().alertas.length>0 || /5 o más toallitas/i.test(String(F.gm||""))); },
+  ginec: function(){ return F.sexo==="F" && (lecturaFem().alertas.length>0 || /5 o más toallitas/i.test(String(F.gm||"")) || /moderad|sever/i.test(String(F.dismenorrea||""))); },
   sexual: function(){ return /^S[ií]\.?$/i.test(String(F.irs||"").trim()) && (sinMetodo() || sinBarrera()); },
   exFisico: function(){ return /Acné moderado inflamatorio|Acantosis nigricans|Estrías de distensión|Bocio|Caries visibles|Soplo sistólico|Asimetría de escápulas/i.test(String(F.exFisico||"")); },
   antropo: function(){
@@ -2498,7 +2504,7 @@ var SUGERIDAS = [
   {id:"sg_actfis", txt:"Se indica aumentar progresivamente la actividad física adaptada a sus posibilidades y entorno, y reducir el tiempo sedentario.",
    d:function(){ var a = antro(); return !!(a.imcC && /sobrepeso|obesidad/i.test(a.imcC.t)); }},
   {id:"sg_sm",     txt:"Interconsulta con Salud Mental.",    mot:"Sintomatología afectiva referida en la consulta.", d:function(){
-      return /Autolesiones|Refiere ideas de muerte|Síntomas compatibles con depresión|Crisis de angustia|Síntomas de ansiedad/i.test(F.animo); }},
+      return !smSeguimiento() && /Autolesiones|Refiere ideas de muerte|Síntomas compatibles con depresión|Crisis de angustia|Síntomas de ansiedad/i.test(F.animo); }},
   {id:"sg_consumo", txt:"Interconsulta con Salud Mental por consumo.", mot:"Consumo problemático a evaluar.",
    d:function(){ return txProb().length>0; }},
   /* "auto": se agregan solas a las indicaciones; se pueden quitar */
@@ -2510,8 +2516,15 @@ var SUGERIDAS = [
    d:function(){ var a = String(F.alimentacion||""); return a.indexOf("No come carne.")>=0 && a.indexOf("No come verduras.")>=0; }},
   {id:"sg_p4",   auto:true, txt:"Se dan pautas para sostener las 4 comidas.",
    d:function(){ return /Se saltea el desayuno|No hace las 4 comidas/.test(String(F.alimentacion||"")); }},
-  {id:"sg_phar", auto:true, txt:"Se dan pautas para moderar el consumo de harinas.",
-   d:function(){ return String(F.alimentacion||"").indexOf("Prioriza el consumo de harinas.")>=0; }}
+  {id:"sg_phar", auto:true,
+   txtFn:function(){
+     var a = String(F.alimentacion||""), q = [];
+     if(a.indexOf("Prioriza el consumo de harinas.")>=0) q.push("harinas");
+     if(a.indexOf("Comida chatarra.")>=0) q.push("comida chatarra");
+     if(a.indexOf("Jugos y gaseosas.")>=0) q.push("bebidas azucaradas");
+     return "Se dan pautas para moderar el consumo de "+(q.length>1 ? q.slice(0,-1).join(", ")+" y "+q[q.length-1] : q[0])+".";
+   },
+   d:function(){ return /Prioriza el consumo de harinas\.|Comida chatarra\.|Jugos y gaseosas\./.test(String(F.alimentacion||"")); }}
 ];
 /* conductas que además preparan un papel en el módulo de documentos */
 var MAPA_DOC = {
@@ -3195,8 +3208,9 @@ function chequeo(){
       .concat(EXTRAS).concat(MEDS.map(medTexto)).join(" ");
 
   if(/Autolesiones|Refiere ideas de muerte|Síntomas compatibles con depresión/i.test(F.animo)
-     && !/Salud Mental|pautas de alarma/i.test(conductasTxt))
-    cruces.push("Marcaste riesgo en salud mental y no hay conducta registrada: interconsulta con Salud Mental o pautas de alarma.");
+     && !(smSeguimiento() ? /pautas de alarma/i : /Salud Mental|pautas de alarma/i).test(conductasTxt))
+    cruces.push(smSeguimiento() ? "Marcaste riesgo en salud mental: está en seguimiento por Salud Mental; dejá asentadas las pautas de alarma."
+                                : "Marcaste riesgo en salud mental y no hay conducta registrada: interconsulta con Salud Mental o pautas de alarma.");
 
   if(PENDIENTES.some(function(p){ return /sin turno/i.test(p); })
      && !/reiter|solicit|gestion/i.test(conductasTxt + " " + F.conductasTexto + " " + PENDIENTES.join(" ")))
