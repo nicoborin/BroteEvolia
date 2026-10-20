@@ -77,6 +77,9 @@
   .tanner button{flex:1;font-size:12px;padding:6px 2px;border:1px solid #d4d4d8;background:#fff;border-radius:4px;cursor:pointer;color:#52525b}
   .tanner{display:flex;gap:4px}
   .txfila{margin:6px 0 10px}
+  .tmpsub{font-size:11px;color:#71717a;margin:6px 0 3px}
+  .tmpfin{flex-wrap:wrap}
+  .tmpfin button{flex:1 1 auto;padding:6px 8px}
   .txnom{font-size:12px;font-weight:600;color:#3f3f46;margin-bottom:4px}
   .txmas{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
   .txmas input{max-width:160px}
@@ -285,7 +288,7 @@ var VACIO = {
   cardioAnio:"", visualAnio:"", labAnio:"",
   actFisica:"", tiempoLibre:"", amigos:"",
   toxicos:"", redes:"",
-  txTbq:"", txTbqIni:"", txTbqProb:"", txOh:"", txOhIni:"", txOhCeea:"", txOhProb:"", txThc:"", txThcIni:"", txThcProb:"", txOtr:"", txOtrQue:"", txOtrIni:"", txOtrProb:"", txTbqSoc:"", txTbqSol:"", txOhSoc:"", txOhSol:"", txThcSoc:"", txThcSol:"", txOtrSoc:"", txOtrSol:"", tmpIdeas:"", tmpIdeasTxt:"", tmpAuto:"", tmpAutoTxt:"", tmpAng:"", tmpAngTxt:"", tmpAns:"", tmpAnsTxt:"", tmpTriste:"", tmpTristeTxt:"",
+  txTbq:"", txTbqIni:"", txTbqProb:"", txOh:"", txOhIni:"", txOhCeea:"", txOhProb:"", txThc:"", txThcIni:"", txThcProb:"", txOtr:"", txOtrQue:"", txOtrIni:"", txOtrProb:"", txTbqSoc:"", txTbqSol:"", txOhSoc:"", txOhSol:"", txThcSoc:"", txThcSol:"", txOtrSoc:"", txOtrSol:"", tmpIdeas:"", tmpIdeasTxt:"", tmpAuto:"", tmpAutoTxt:"", tmpAng:"", tmpAngTxt:"", tmpAns:"", tmpAnsTxt:"", tmpTriste:"", tmpTristeTxt:"", tmpIdeasD:"", tmpIdeasDTxt:"", tmpIdeasU:"", tmpIdeasUTxt:"", tmpAutoD:"", tmpAutoDTxt:"", tmpAutoU:"", tmpAutoUTxt:"", tmpAutoFin:"", tmpAutoFinTxt:"", tmpAutoCuida:"", tmpDepD:"", tmpDepDTxt:"", tmpAngD:"", tmpAngDTxt:"", tmpAnsD:"", tmpAnsDTxt:"", tmpTristeD:"", tmpTristeDTxt:"",
   alimentacion:"",
   sueno:"", telarca:"", menarca:"", fum:"", rm:"", dismenorrea:"", gm:"",
   aoG:"", aoP:"", aoC:"", aoA:"",
@@ -301,7 +304,7 @@ var NO_PLANTILLA = ["nombre","fn","fecha","tel","acompRel","acompNombre","motivo
   "apellido","dni","docObs","docEsp","docMotivo","docRp","docTitulo","docCuerpo",
   "turnoFecha","turnoHora","turnoOficial","colegio","cardioAnio","visualAnio","labAnio",
   "obsAntec","obsSocial","obsCotidiana","obsSexual","obsExamen","obsAlim","obsSueno","animo","obsEscolar","obsConsulta",
-  "peso","talla","prevPeso","prevTalla","prevFecha","cintura","ta","fum","menarca","telarca","tannerA","tannerVP","orqD","orqI","diagnostico","txTbq","txTbqIni","txTbqProb","txOh","txOhIni","txOhCeea","txOhProb","txThc","txThcIni","txThcProb","txOtr","txOtrQue","txOtrIni","txOtrProb","txTbqSoc","txTbqSol","txOhSoc","txOhSol","txThcSoc","txThcSol","txOtrSoc","txOtrSol","tmpIdeas","tmpIdeasTxt","tmpAuto","tmpAutoTxt","tmpAng","tmpAngTxt","tmpAns","tmpAnsTxt","tmpTriste","tmpTristeTxt"];
+  "peso","talla","prevPeso","prevTalla","prevFecha","cintura","ta","fum","menarca","telarca","tannerA","tannerVP","orqD","orqI","diagnostico","txTbq","txTbqIni","txTbqProb","txOh","txOhIni","txOhCeea","txOhProb","txThc","txThcIni","txThcProb","txOtr","txOtrQue","txOtrIni","txOtrProb","txTbqSoc","txTbqSol","txOhSoc","txOhSol","txThcSoc","txThcSol","txOtrSoc","txOtrSol","tmpIdeas","tmpIdeasTxt","tmpAuto","tmpAutoTxt","tmpAng","tmpAngTxt","tmpAns","tmpAnsTxt","tmpTriste","tmpTristeTxt","tmpIdeasD","tmpIdeasDTxt","tmpIdeasU","tmpIdeasUTxt","tmpAutoD","tmpAutoDTxt","tmpAutoU","tmpAutoUTxt","tmpAutoFin","tmpAutoFinTxt","tmpAutoCuida","tmpDepD","tmpDepDTxt","tmpAngD","tmpAngDTxt","tmpAnsD","tmpAnsDTxt","tmpTristeD","tmpTristeDTxt"];
 var F = Object.assign({}, VACIO);
 var CONDUCTAS = new Set();
 var EXTRAS = [];
@@ -740,25 +743,63 @@ function txTexto(){
   if(neg.length) partes.push("Niega "+(neg.length>1 ? neg.slice(0,-1).join(", ")+" y "+neg[neg.length-1] : neg[0])+".");
   return partes.join(" ");
 }
-/* temporalidad en situación anímica: aparece solo con el chip marcado */
-var TEMP = [{k:"Ideas", chip:"Refiere ideas de muerte.", n:"Ideas de muerte"},
-            {k:"Auto",  chip:"Autolesiones.",            n:"Autolesiones"},
-            {k:"Ang",   chip:"Crisis de angustia.",      n:"Crisis de angustia"},
-            {k:"Ans",   chip:"Síntomas de ansiedad.",    n:"Síntomas de ansiedad"},
-            {k:"Triste",chip:"Se siente triste.",        n:"Tristeza"}];
-var TEMP_OP = ["actual","último mes","hace meses","hace más de un año","otro"];
+/* temporalidad en situación anímica: aparece solo con el chip marcado.
+   Ideas de muerte y autolesiones: desde cuándo y última vez; el resto, solo desde hace cuánto. */
+var TEMP = [{k:"Ideas", chip:"Refiere ideas de muerte.",            n:"Ideas de muerte",      ult:true},
+            {k:"Auto",  chip:"Autolesiones.",                       n:"Autolesiones",         ult:true},
+            {k:"Dep",   chip:"Síntomas compatibles con depresión.", n:"Síntomas depresivos"},
+            {k:"Ang",   chip:"Crisis de angustia.",                 n:"Crisis de angustia"},
+            {k:"Ans",   chip:"Síntomas de ansiedad.",               n:"Síntomas de ansiedad"},
+            {k:"Triste",chip:"Se siente triste.",                   n:"Tristeza"}];
+var TEMP_DESDE_ULT = ["semanas","meses","más de un año","otro"];
+var TEMP_DESDE = ["días","semanas","meses","más de un año","otro"];
+var TEMP_ULT = ["actual","último mes","hace meses","hace más de un año","otro"];
+var AUTO_FIN = ["aliviar la angustia","autocastigo","comunicar el malestar o pedir ayuda","no sabe o no refiere","otro"];
+var AUTO_FIN_FRASE = {"aliviar la angustia":"para aliviar la angustia","autocastigo":"como autocastigo",
+  "comunicar el malestar o pedir ayuda":"para comunicar el malestar o pedir ayuda","no sabe o no refiere":"no refiere con qué fin"};
+var AUTO_CUIDA = ["las cuida y limpia","no las cuida","requirieron atención médica"];
+function tempSub(id, titulo, txtKey, ph){
+  return '<div class="tmpsub">'+titulo+'</div><div class="tanner" data-seg="'+id+'"></div>'
+    + (txtKey ? '<div class="txmas" id="mas_'+txtKey+'" style="display:none"><input data-k="'+txtKey+'" placeholder="'+ph+'"></div>' : '');
+}
 function tempFila(s){
-  return '<div class="txfila" id="tmpfila'+s.k+'" style="display:none"><div class="txnom">'+s.n+' — ¿hace cuánto?</div>'
-    + '<div class="tanner" data-seg="tmp'+s.k+'"></div>'
-    + '<div class="txmas" id="tmpmas'+s.k+'" style="display:none"><input data-k="tmp'+s.k+'Txt" placeholder="ej.: hace 2 semanas"></div></div>';
+  var h = '<div class="txfila" id="tmpfila'+s.k+'" style="display:none"><div class="txnom">'+s.n+'</div>';
+  h += tempSub("tmp"+s.k+"D", s.ult ? "¿Desde cuándo?" : "¿Desde hace cuánto?", "tmp"+s.k+"DTxt", "ej.: desde los 13 años");
+  if(s.ult) h += tempSub("tmp"+s.k+"U", "¿Última vez?", "tmp"+s.k+"UTxt", "ej.: hace 2 semanas");
+  if(s.k==="Auto"){
+    h += '<div class="tmpsub">¿Con qué fin?</div><div class="tanner tmpfin" id="tmpAutoFinBtns"></div>'
+      +  '<div class="txmas" id="mas_tmpAutoFinTxt" style="display:none"><input data-k="tmpAutoFinTxt" placeholder="otro fin"></div>';
+    h += tempSub("tmpAutoCuida", "¿Se las cuida?", "", "");
+  }
+  return h + '</div>';
+}
+function tmpFinLista(){ return String(F.tmpAutoFin||"").split("|").filter(Boolean); }
+function unirY(a){ return a.length>1 ? a.slice(0,-1).join(", ")+" y "+a[a.length-1] : (a[0]||""); }
+function tempDesde(v, txt){
+  if(!v) return "";
+  if(v==="otro") return String(txt||"").trim().replace(/\.+$/,"");
+  return "desde hace "+v;
 }
 function animoTexto(){
   var t = String(F.animo||"").trim();
   TEMP.forEach(function(s){
-    var v = F["tmp"+s.k];
-    if(!v || t.indexOf(s.chip)<0) return;
-    var q = v==="otro" ? String(F["tmp"+s.k+"Txt"]||"").trim().replace(/\.+$/,"") : v;
-    if(q) t = t.replace(s.chip, s.chip.replace(/\.$/,"")+" ("+q+").");
+    if(t.indexOf(s.chip)<0) return;
+    var p = [];
+    var d = tempDesde(F["tmp"+s.k+"D"], F["tmp"+s.k+"DTxt"]);
+    if(d) p.push(d);
+    if(s.ult){
+      var u = F["tmp"+s.k+"U"];
+      var ut = u==="otro" ? String(F["tmp"+s.k+"UTxt"]||"").trim().replace(/\.+$/,"") : u;
+      if(ut) p.push("última vez: "+ut);
+    }
+    if(s.k==="Auto"){
+      var f = tmpFinLista().map(function(x){
+        return x==="otro" ? String(F.tmpAutoFinTxt||"").trim().replace(/\.+$/,"") : AUTO_FIN_FRASE[x];
+      }).filter(Boolean);
+      if(f.length) p.push(unirY(f));
+      if(F.tmpAutoCuida) p.push(F.tmpAutoCuida);
+    }
+    if(p.length) t = t.replace(s.chip, s.chip.replace(/\.$/,"")+" ("+p.join("; ")+").");
   });
   return t;
 }
@@ -1073,16 +1114,28 @@ function pintarTx(){
   if(bn) bn.className = TX.every(function(s){ return F["tx"+s.k]==="Niega"; }) ? "chip on" : "chip";
 }
 function pintarTemp(){
+  function seg(id, ops, cls){
+    var c = document.querySelector('[data-seg="'+id+'"]');
+    if(c) c.innerHTML = ops.map(function(v){
+      return '<button class="'+(F[id]===v ? (cls && cls(v) || "on") : "")+'" data-seg="'+id+'" data-v="'+v+'">'+v+'</button>';
+    }).join("");
+  }
+  function mas(k, si){ var m = document.getElementById("mas_"+k); if(m) m.style.display = si ? "" : "none"; }
   TEMP.forEach(function(s){
     var fila = document.getElementById("tmpfila"+s.k);
     if(!fila) return;
     var vis = String(F.animo||"").indexOf(s.chip)>=0;
     fila.style.display = vis ? "" : "none";
-    document.querySelector('[data-seg="tmp'+s.k+'"]').innerHTML = TEMP_OP.map(function(v){
-      return '<button class="'+(F["tmp"+s.k]===v?"on":"")+'" data-seg="tmp'+s.k+'" data-v="'+v+'">'+v+'</button>';
-    }).join("");
-    document.getElementById("tmpmas"+s.k).style.display = (vis && F["tmp"+s.k]==="otro") ? "" : "none";
+    seg("tmp"+s.k+"D", s.ult ? TEMP_DESDE_ULT : TEMP_DESDE);
+    mas("tmp"+s.k+"DTxt", vis && F["tmp"+s.k+"D"]==="otro");
+    if(s.ult){ seg("tmp"+s.k+"U", TEMP_ULT); mas("tmp"+s.k+"UTxt", vis && F["tmp"+s.k+"U"]==="otro"); }
   });
+  var fb = document.getElementById("tmpAutoFinBtns"), sel = tmpFinLista();
+  if(fb) fb.innerHTML = AUTO_FIN.map(function(v){
+    return '<button class="'+(sel.indexOf(v)>=0?"on":"")+'" data-tmpfin="'+v+'">'+v+'</button>';
+  }).join("");
+  mas("tmpAutoFinTxt", sel.indexOf("otro")>=0);
+  seg("tmpAutoCuida", AUTO_CUIDA, function(v){ return v==="no las cuida" ? "no" : "on"; });
 }
 /* indicaciones que se agregan solas (se pueden quitar; no vuelven si se quitaron) */
 var AUTO_VISTAS = {};
@@ -2089,6 +2142,11 @@ document.addEventListener("click", function(e){
     }
     volcar(); render(); return;
   }
+  if(t.hasAttribute("data-tmpfin")){
+    var fv = t.getAttribute("data-tmpfin"), fl = tmpFinLista(), fi = fl.indexOf(fv);
+    if(fi>=0) fl.splice(fi,1); else fl.push(fv);
+    F.tmpAutoFin = fl.join("|"); render(); return;
+  }
   if(t.id === "btnTxNiega"){
     var todosNiega = TX.every(function(s){ return F["tx"+s.k]==="Niega"; });
     TX.forEach(function(s){ F["tx"+s.k] = todosNiega ? "" : "Niega"; });
@@ -2516,6 +2574,8 @@ var SUGERIDAS = [
    d:function(){ var a = String(F.alimentacion||""); return a.indexOf("No come carne.")>=0 && a.indexOf("No come verduras.")>=0; }},
   {id:"sg_p4",   auto:true, txt:"Se dan pautas para sostener las 4 comidas.",
    d:function(){ return /Se saltea el desayuno|No hace las 4 comidas/.test(String(F.alimentacion||"")); }},
+  {id:"sg_cuid", auto:true, txt:"Se dan pautas de cuidado de las lesiones.",
+   d:function(){ return /Autolesiones/.test(String(F.animo||"")) && F.tmpAutoCuida==="no las cuida"; }},
   {id:"sg_phar", auto:true,
    txtFn:function(){
      var a = String(F.alimentacion||""), q = [];
