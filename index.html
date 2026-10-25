@@ -83,6 +83,9 @@
   .dxitem.destino-arriba{box-shadow:0 -2px 0 var(--violeta)}
   .dxitem.destino-abajo{box-shadow:0 2px 0 var(--violeta)}
   .tmpsub{font-size:11px;color:#71717a;margin:6px 0 3px}
+  #animoTemp{display:flex;flex-direction:column}
+  #animoTemp .txfila{border:1px solid #d4d4d8;border-left:4px solid var(--sec,#701070);border-radius:8px;padding:8px 10px 10px;margin:8px 0;background:#fafafa}
+  #animoTemp .txnom{font-size:13px;color:var(--sec,#701070);margin-bottom:2px}
   .tmpfin{flex-wrap:wrap}
   .tmpfin button{flex:1 1 auto;padding:6px 8px}
   .txnom{font-size:12px;font-weight:600;color:#3f3f46;margin-bottom:4px}
@@ -771,8 +774,9 @@ function tempFila(s){
   var h = '<div class="txfila" id="tmpfila'+s.k+'" style="display:none"><div class="txnom">'+s.n+'</div>';
   h += tempSub("tmp"+s.k+"D", s.ult ? "¿Desde cuándo?" : "¿Desde hace cuánto?", "tmp"+s.k+"DTxt", "ej.: desde los 13 años");
   if(s.ult) h += tempSub("tmp"+s.k+"U", "¿Última vez?", "tmp"+s.k+"UTxt", "ej.: hace 2 semanas");
-  if(s.ult) h += '<div class="tmpsub">Desencadenante</div>'
-    + '<div class="txmas" style="margin-top:0"><input data-k="tmp'+s.k+'Desc" placeholder="ej.: discusiones con la madre desde marzo" style="max-width:none;flex:1 1 220px">'
+  var de = s.k==="Ideas" ? "las ideas de muerte" : "las autolesiones";
+  if(s.ult) h += '<div class="tmpsub">Desencadenante de '+de+'</div>'
+    + '<div class="txmas" style="margin-top:0"><input data-k="tmp'+s.k+'Desc" placeholder="desencadenante de '+de+'" style="max-width:none;flex:1 1 220px">'
     + '<div class="tanner" data-seg="tmp'+s.k+'Viol"></div></div>'
     + '<p class="nota" style="border:0;padding:0;margin:4px 0 0">Más frecuentes en adolescentes (Hawton, Lancet 2012): conflicto familiar, conflicto con pares o pareja, hostigamiento o ciberacoso, dificultades escolares, duelo, violencia, consumo.</p>';
   if(s.k==="Auto"){
@@ -1147,7 +1151,11 @@ function pintarTemp(){
     seg("tmp"+s.k+"D", s.ult ? TEMP_DESDE_ULT : TEMP_DESDE);
     mas("tmp"+s.k+"DTxt", vis && F["tmp"+s.k+"D"]==="otro");
     if(s.ult){ seg("tmp"+s.k+"U", TEMP_ULT); mas("tmp"+s.k+"UTxt", vis && F["tmp"+s.k+"U"]==="otro");
-      seg("tmp"+s.k+"Viol", [VIOL], function(){ return "no"; }); }
+      var cv = document.querySelector('[data-seg="tmp'+s.k+'Viol"]');
+      if(cv) cv.innerHTML = '<button class="'+(F["tmp"+s.k+"Viol"]===VIOL?"no":"")+'" data-seg="tmp'+s.k+'Viol" data-v="'+VIOL+'">'
+        + 'Situación de violencia ('+(s.k==="Ideas"?"ideas de muerte":"autolesiones")+')</button>'; }
+    /* mismo orden que en la nota: según dónde está el chip en el texto */
+    fila.style.order = vis ? String(String(F.animo||"").indexOf(s.chip)) : "9999";
   });
   var fb = document.getElementById("tmpAutoFinBtns"), sel = tmpFinLista();
   if(fb) fb.innerHTML = AUTO_FIN.map(function(v){
