@@ -49,8 +49,7 @@
   .lchip{all:unset;cursor:pointer}
   .lchip:hover{text-decoration:underline}
   .chip.editando{outline:2px solid var(--violeta);outline-offset:1px}
-  #sexoSeg button{font-size:17px;line-height:1;min-width:36px}
-  #generoSeg button{font-size:13px}
+
   .resumen{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:#71717a;font-size:11px;max-width:55%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .chip.medio{background:#fef3c7;border-color:#d97706;color:#78350f}
   .chip.alto{background:#ffe4e6;border-color:#e11d48;color:#9f1239}
@@ -140,6 +139,33 @@
   .rojo:hover{color:#fb7185}
   .verde{background:#059669;color:#fff}
   footer{max-width:1200px;margin:0 auto;padding:0 16px 32px;font-size:11px;color:#71717a}
+  /* barra superior: grupos en pastilla y botones redondeados */
+  .barra{gap:10px}
+  .grupo{display:flex;gap:2px;padding:3px;background:#eef0f8;border-radius:999px}
+  .grupo button{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:#5b6290;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+  #sexoSeg button{width:36px;padding:0;justify-content:center}
+  .grupo button:hover{color:var(--violeta);background:rgba(255,255,255,.55)}
+  .grupo button.on{background:var(--violeta);color:#fff;box-shadow:0 2px 6px rgba(47,58,143,.35)}
+  .sepBarra{width:1px;height:24px;background:#e4e4e7;margin:0 2px}
+  @media (max-width:640px){.sepBarra{display:none}}
+  .barra .btn{height:36px;padding:0 14px;border-radius:999px;border:1px solid #e0e2ee;background:#fff;color:var(--violeta);font-size:12.5px;gap:6px;box-shadow:0 1px 2px rgba(24,24,27,.05)}
+  .barra .btn:hover{background:#f3f4fb;border-color:#c7cbe6}
+  .barra .btn.fin{background:var(--violeta);border-color:var(--violeta);color:#fff;box-shadow:0 2px 8px rgba(47,58,143,.3)}
+  .barra .btn.fin:hover{filter:brightness(1.12)}
+  .barra .btn.breveOn{background:#059669;border-color:#059669;color:#fff}
+  /* chips y botones de opción con la misma estética, compactos */
+  .chips{gap:5px}
+  .chip{padding:3px 10px;border-radius:999px;border:1px solid transparent;background:#f1f2f8;color:#3f4470;transition:background .15s,color .15s}
+  .chip:hover{background:#e6e8f5;color:var(--violeta);border-color:transparent}
+  .chip.on{background:var(--violeta);border-color:var(--violeta);color:#fff;box-shadow:0 2px 5px rgba(47,58,143,.25)}
+  .tanner{gap:2px;padding:3px;background:#eef0f8;border-radius:999px}
+  .tanner button{border:0;background:transparent;border-radius:999px;color:#5b6290;font-weight:600;padding:5px 4px}
+  .tanner button:hover{background:rgba(255,255,255,.55);color:var(--violeta)}
+  .tanner button.on{background:var(--violeta);color:#fff;box-shadow:0 2px 5px rgba(47,58,143,.3)}
+  .tanner button.no{background:#e11d48;color:#fff;box-shadow:0 2px 5px rgba(225,29,72,.3)}
+  .txmas .tanner button{padding:5px 10px}
+  .chip.medio{background:#fef3c7;border-color:#f5c26b;color:#78350f;box-shadow:none}
+  .chip.alto{background:#ffe4e6;border-color:#f59aab;color:#9f1239;box-shadow:none}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2F3A8F">
@@ -160,18 +186,19 @@
     </div>
   </div>
   <div class="barra">
-    <div class="seg" id="sexoSeg">
-      <button data-sexo="F" class="on" title="Sexo asignado al nacer: femenino" aria-label="Sexo asignado al nacer: femenino">&#x2640;&#xFE0E;</button>
-      <button data-sexo="M" title="Sexo asignado al nacer: masculino" aria-label="Sexo asignado al nacer: masculino">&#x2642;&#xFE0E;</button>
+    <div class="grupo" id="sexoSeg">
+      <button data-sexo="F" class="on" title="Sexo asignado al nacer: femenino" aria-label="Sexo asignado al nacer: femenino"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="9" r="5.2"/><path d="M12 14.2V22M8.6 18.4h6.8"/></svg></button>
+      <button data-sexo="M" title="Sexo asignado al nacer: masculino" aria-label="Sexo asignado al nacer: masculino"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="14" r="5.2"/><path d="M13.7 10.3 20 4M14.6 4H20v5.4"/></svg></button>
     </div>
-    <div class="seg" id="generoSeg">
-      <button data-genero="trans" title="Persona trans: la nota se redacta según su identidad">&#x26A7;&#xFE0E; Trans</button>
-      <button data-genero="nb" title="Persona no binaria">No binario</button>
+    <div class="grupo" id="generoSeg">
+      <button data-genero="trans" title="Persona trans: la nota se redacta según su identidad"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12.5" r="4.3"/><path d="M15.1 9.4 20 4.5M16.2 4.5H20v3.8M8.9 9.4 4 4.5M7.8 4.5H4v3.8M5.4 8.2l2.4-2.4M12 16.8V22M9.6 19.6h4.8"/></svg><span>Trans</span></button>
+      <button data-genero="nb" title="Persona no binaria"><span>No binario</span></button>
     </div>
-    <button class="btn" id="btnBreve">Consulta breve</button>
-    <button class="btn" id="btnImportar">Importar</button>
-    <button class="btn" id="btnPanel">Plantillas</button>
-    <button class="btn" id="btnLimpiar">Finalizar</button>
+    <span class="sepBarra"></span>
+    <button class="btn" id="btnBreve"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Consulta breve</span></button>
+    <button class="btn" id="btnImportar"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg><span>Importar</span></button>
+    <button class="btn" id="btnPanel"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Plantillas</span></button>
+    <button class="btn fin" id="btnLimpiar"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Finalizar</span></button>
   </div>
 </header>
 
@@ -2289,8 +2316,8 @@ function render(){
     document.getElementById(id).hidden = F.breve;
   });
   var bb = document.getElementById("btnBreve");
-  bb.style.background = F.breve ? "#059669" : "";
-  bb.textContent = F.breve ? "Consulta breve ✓" : "Consulta breve";
+  bb.className = "btn" + (F.breve ? " breveOn" : "");
+  bb.querySelector("span").textContent = F.breve ? "Consulta breve ✓" : "Consulta breve";
   document.querySelectorAll("#sexoSeg button").forEach(function(b){
     b.className = b.getAttribute("data-sexo")===F.sexo ? "on" : "";
   });
