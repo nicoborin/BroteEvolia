@@ -44,6 +44,13 @@
   .flecha{font-size:10px;color:#a1a1aa;transition:transform .15s}
   section.card.cerrada .flecha{transform:rotate(-90deg)}
   section.card.cerrada .cuerpo{display:none}
+  .chip.revisar{background:#fff !important;color:#18181b !important;border:1px dashed #B01020 !important}
+  .chip .revtag,.revtag{font-size:10px;color:#B01020;font-weight:700;margin-left:4px;letter-spacing:.2px}
+  .lchip{all:unset;cursor:pointer}
+  .lchip:hover{text-decoration:underline}
+  .chip.editando{outline:2px solid var(--violeta);outline-offset:1px}
+  #sexoSeg button{font-size:17px;line-height:1;min-width:36px}
+  #generoSeg button{font-size:13px}
   .resumen{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:#71717a;font-size:11px;max-width:55%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   .chip.medio{background:#fef3c7;border-color:#d97706;color:#78350f}
   .chip.alto{background:#ffe4e6;border-color:#e11d48;color:#9f1239}
@@ -154,8 +161,12 @@
   </div>
   <div class="barra">
     <div class="seg" id="sexoSeg">
-      <button data-sexo="F" class="on">Femenino</button>
-      <button data-sexo="M">Masculino</button>
+      <button data-sexo="F" class="on" title="Sexo asignado al nacer: femenino" aria-label="Sexo asignado al nacer: femenino">&#x2640;&#xFE0E;</button>
+      <button data-sexo="M" title="Sexo asignado al nacer: masculino" aria-label="Sexo asignado al nacer: masculino">&#x2642;&#xFE0E;</button>
+    </div>
+    <div class="seg" id="generoSeg">
+      <button data-genero="trans" title="Persona trans: la nota se redacta según su identidad">&#x26A7;&#xFE0E; Trans</button>
+      <button data-genero="nb" title="Persona no binaria">No binario</button>
     </div>
     <button class="btn" id="btnBreve">Consulta breve</button>
     <button class="btn" id="btnImportar">Importar</button>
@@ -265,7 +276,8 @@ function clasIMC(z,esF){
   if(z>1) return {t:"sobrepeso",c:"aviso"};
   if(z<-3) return {t:"delgadez severa",c:"alerta"};
   if(z<-2) return {t:"delgadez",c:"aviso"};
-  return {t: esF?"eutrófica":"eutrófico", c:"ok"};
+  var g = genNota();
+  return {t: g==="f" ? "eutrófica" : (g==="m" ? "eutrófico" : "con IMC adecuado"), c:"ok"};
 }
 function clasTalla(z){
   if(z<-3) return {t:"talla baja severa",c:"alerta"};
@@ -281,7 +293,7 @@ function fechaLocalISO(d){
 }
 var hoy = fechaLocalISO();
 var VACIO = {
-  sexo:"F", breve:false, titulos:true, nombre:"", apellido:"", dni:"",
+  sexo:"F", genero:"", idGenero:"", tratGen:"", nombreDoc:"nombre elegido", nombreDni:"", breve:false, titulos:true, nombre:"", apellido:"", dni:"",
   docObs:"", docEsp:"", docMotivo:"", docRp:"", docTitulo:"", docCuerpo:"",
   turnoFecha:"", turnoHora:"", turnoOficial:"",
   conSello:true, conFirma:false, fn:"", fecha:hoy, tel:"",
@@ -306,7 +318,7 @@ var VACIO = {
   ta:"", peso:"", talla:"", prevPeso:"", prevTalla:"", prevFecha:"", cintura:"",
   diagnostico:"", conductasTexto:"", proximoControl:"", obsConsulta:""
 };
-var NO_PLANTILLA = ["nombre","fn","fecha","tel","acompRel","acompNombre","motivoAcomp",
+var NO_PLANTILLA = ["genero","idGenero","tratGen","nombreDoc","nombreDni","nombre","fn","fecha","tel","acompRel","acompNombre","motivoAcomp",
   "ultimaConsulta","intercurrencias","enfActual",
   "localidad","nbi","auh","aoG","aoP","aoC","aoA","cursoN","turno","rendimiento","trabajo","noRepitio","escEstado","egresoAnio","estudioTipo","estudioQue","abandonoCausa",
   "apellido","dni","docObs","docEsp","docMotivo","docRp","docTitulo","docCuerpo",
@@ -527,6 +539,20 @@ function asimetria(){
   };
 }
 var CERRADAS = {sDocs:true};
+/* al iniciar: abiertas solo Paciente y Motivo de consulta */
+function cerrarInicial(){
+  CERRADAS = {sDocs:true};
+  SECCIONES.forEach(function(sec){ if(sec.id!=="sPaciente" && sec.id!=="sMotivo") CERRADAS[sec.id] = true; });
+}
+/* acordeón: abrir una sección cierra las demás */
+function abrirSolo(sid){
+  SECCIONES.forEach(function(sec){ CERRADAS[sec.id] = true; });
+  CERRADAS.sDocs = true;
+  CERRADAS[sid] = false;
+}
+/* lo importado queda marcado "revisar" hasta que se edita y confirma */
+var REV = {}, EDIT = null;
+function rk(k,t){ return k+"\u0001"+t; }
 
 function resumen(id){
   var a = antro(), t;
@@ -645,7 +671,7 @@ function claseRiesgo(v, activo, k){
   return " on";
 }
 
-var CHIPS_SUMA = {redes:1, toxicos:1, alimentacion:1, mac:1, sueno:1, urologico:1, nbi:1,
+var CHIPS_SUMA = {tratGen:1, redes:1, toxicos:1, alimentacion:1, mac:1, sueno:1, urologico:1, nbi:1,
   rendimiento:1, trabajo:1, actFisica:1, tiempoLibre:1, animo:1, diagnostico:1, exFisico:1,
   cardio:1, visual:1, lab:1};
 
@@ -698,6 +724,7 @@ var CHIPS = {
     "Acantosis nigricans cervical.","Estrías de distensión.","Bocio.","Caries visibles.",
     "Soplo sistólico funcional.","Asimetría de escápulas.","Pie plano.","Piercings.","Tatuajes."],
   proximoControl:["en 30 días","en 45 días","en 2 meses","en 3 meses","en 6 meses","anual"],
+  tratGen:["Sin tratamiento.","Bloqueo puberal.","Hormonas indicadas.","Automedicación hormonal."],
   diagnostico:[]
 };
 
@@ -872,12 +899,36 @@ function unirYE(a){
   var u = a[a.length-1];
   return a.slice(0,-1).join(", ")+yE(u)+u;
 }
-/* "acompañado/a" según el sexo cargado */
+/* género de la redacción: el de la identidad ("f", "m" o "n" para no binario) */
+function genNota(){
+  if(F.genero==="nb") return "n";
+  var f = F.sexo==="F";
+  if(F.genero==="trans") f = !f;
+  return f ? "f" : "m";
+}
+/* en documentos con el nombre del DNI, el género acompaña al DNI */
+function genDoc(){ return (F.genero && F.nombreDoc==="nombre del DNI") ? (F.sexo==="F" ? "f" : "m") : genNota(); }
+/* "acompañado/a" según la identidad */
 function generoTxt(t){
   t = String(t||"");
-  if(F.sexo==="F") return t.replace(/(\w)o\/a\b/g,"$1a");
-  if(F.sexo==="M") return t.replace(/(\w)o\/a\b/g,"$1o");
+  var g = genNota();
+  if(g==="f") return t.replace(/(\w)o\/a\b/g,"$1a");
+  if(g==="m") return t.replace(/(\w)o\/a\b/g,"$1o");
   return t;
+}
+var TRAT_FRASE = {"Sin tratamiento.":"Sin tratamiento de afirmación de género.","Bloqueo puberal.":"En bloqueo puberal.",
+  "Hormonas indicadas.":"Recibe tratamiento hormonal indicado.","Automedicación hormonal.":"Refiere automedicación hormonal."};
+function identidadTexto(){
+  if(!F.genero) return "";
+  var o = [F.genero==="nb" ? "Persona no binaria. Sexo asignado al nacer: "+(F.sexo==="F" ? "femenino." : "masculino.")
+                           : (F.sexo==="F" ? "Varón trans." : "Mujer trans.")];
+  var t = String(F.idGenero||"").trim();
+  if(t) o.push(conPunto(mayus1(t)));
+  var tr = sacarChips(F.tratGen, CHIPS.tratGen);
+  tr.chips.forEach(function(c){ o.push(TRAT_FRASE[c]||c); });
+  if(tr.resto) o.push(conPunto(tr.resto));
+  if(F.nombreDoc==="nombre del DNI") o.push("Por razones de confidencialidad, los documentos impresos se emiten con el nombre del DNI.");
+  return o.join(" ");
 }
 /* separa del texto los chips conocidos, en el orden en que aparecen, y deja aparte lo escrito a mano */
 function sacarChips(t, lista){
@@ -1061,6 +1112,12 @@ var SECCIONES = [
   {id:"sPaciente", t:"Paciente", h: ""
 
  + '<div class="grid2">'+campo("nombre","Nombre",{ph:"Nicolás"})+campo("tel","Teléfono",{ph:"11 ..."})+'</div>'
+ + '<div id="bloqueGenero" hidden style="border-left:4px solid var(--sec);padding:2px 0 2px 10px;margin:6px 0 10px">'
+ +   campo("idGenero","Identidad de género",{area:true, ph:"nombre elegido, pronombre, quién sabe, desde cuándo"})
+ +   campo("tratGen","Tratamiento")
+ +   '<div class="f"><label>Nombre en los documentos impresos</label><div class="tanner" data-seg="nombreDoc"></div></div>'
+ +   '<div id="wrapNombreDni" hidden>'+campo("nombreDni","Nombre en el DNI",{ph:"para los documentos"})+'</div>'
+ + '</div>'
  + '<div class="grid2">'+campo("fn","Fecha de nacimiento",{tipo:"date"})+campo("fecha","Fecha de consulta",{tipo:"date"})+'</div>'
  + campo("acompRel","Acompañante — vínculo")
  + campo("acompNombre","Acompañante — nombre",{ph:"María"})
@@ -1101,7 +1158,7 @@ var SECCIONES = [
  +   '</div>'
  +   '<div class="chips" id="convChips"></div>'
  + '</div>'
- + campo("localidad","Localidad",{ph:"Bernal"})
+ + campo("localidad","Localidad <span class=\"revtag\" id=\"revLoc\" hidden>revisar</span>",{ph:"Bernal"})
  + '<div class="grid2">'+campo("nbi","NBI")+campo("auh","AUH")+'</div>'
  + campo("obsSocial","Texto libre",{area:true,ph:"Algo fuera de lo común en la situación social"})
   },
@@ -1364,6 +1421,13 @@ function pintarSegmentos(){
     }).join("");
   }
   botones("adams",["negativo","positivo"]);
+  botones("nombreDoc",["nombre elegido","nombre del DNI"]);
+  document.getElementById("bloqueGenero").hidden = !F.genero;
+  document.getElementById("wrapNombreDni").hidden = F.nombreDoc!=="nombre del DNI";
+  document.getElementById("revLoc").hidden = !REV.loc;
+  document.querySelectorAll("#generoSeg button").forEach(function(b){
+    b.className = b.getAttribute("data-genero")===F.genero ? "on" : "";
+  });
   botones("escEstado",["Finalizada","Abandonó"]);
   botones("estudioTipo",["terciario","universitario","curso"]);
   var est = F.escEstado, ver = function(id, si){ var el = document.getElementById(id); if(el) el.style.display = si ? "" : "none"; };
@@ -1410,6 +1474,19 @@ function pintarSegmentos(){
   botones("tannerVP",[1,2,3,4,5].map(function(n){return "VP"+n}));
 }
 
+function convDet(c){ return [c.rel, c.edad && c.edad+" años", c.oficio].filter(Boolean).join(", "); }
+function chipEditable(k, i, t, cls, rev, cruz){
+  var ed = EDIT && EDIT.k===k && EDIT.i===i;
+  return '<span class="chip'+cls+(rev?" revisar":"")+(ed?" editando":"")+'">'
+    + '<button class="lchip" data-ledit="'+k+'" data-i="'+i+'" title="Tocar para editar">'+esc(t)+'</button>'
+    + (rev ? '<span class="revtag">revisar</span>' : '') + ' ' + cruz + '</span>';
+}
+/* campo de escritura de cada lista editable */
+function inputLista(k){
+  if(k==="pend") return document.getElementById("nuevoPend");
+  if(k==="conv") return document.getElementById("convLibre");
+  return document.querySelector('[data-listinput="'+k+'"]');
+}
 function pintarChips(){
   document.querySelectorAll(".chips[data-k]").forEach(function(cont){
     var k = cont.getAttribute("data-k");
@@ -1423,14 +1500,17 @@ function pintarChips(){
     return '<span class="chip on">'+esc(t)+' <b data-extra="'+i+'" style="cursor:pointer">×</b></span>';
   }).join("");
   document.getElementById("pendientes").innerHTML = PENDIENTES.map(function(t,i){
-    return '<span class="chip on">'+esc(t)+' <b data-pend="'+i+'" style="cursor:pointer">×</b></span>';
+    return chipEditable("pend", i, t, " on", REV[rk("pend",t)], '<b data-pend="'+i+'" style="cursor:pointer">×</b>');
   }).join("");
+  document.getElementById("btnPend").textContent = EDIT && EDIT.k==="pend" ? "✓" : "+";
   Object.keys(LISTAS).forEach(function(k){
     var cont = document.querySelector('[data-lista="'+k+'"]');
     if(!cont) return;
     cont.innerHTML = LISTAS[k].map(function(t,i){
-      return '<span class="chip'+claseRiesgo(t,true,k)+'">'+esc(t)+' <b data-listdel="'+k+'" data-i="'+i+'" style="cursor:pointer">×</b></span>';
+      return chipEditable(k, i, t, claseRiesgo(t,true,k), REV[rk(k,t)], '<b data-listdel="'+k+'" data-i="'+i+'" style="cursor:pointer">×</b>');
     }).join("");
+    var bAdd = document.querySelector('[data-listadd="'+k+'"]');
+    if(bAdd) bAdd.textContent = EDIT && EDIT.k===k ? "✓" : "+";
     document.querySelector('[data-listchips="'+k+'"]').innerHTML = (CHIPS_LISTA[k]||[])
       .filter(function(v){ return LISTAS[k].indexOf(v)<0; })
       .map(function(v){ return '<button class="chip" data-listaddchip="'+k+'" data-v="'+esc(v)+'">+ '+esc(v)+'</button>'; })
@@ -1441,9 +1521,9 @@ function pintarChips(){
     return '<span class="chip on">'+ORD[r.n]+' '+r.tipo+' <b data-repitdel="'+i+'" style="cursor:pointer">×</b></span>';
   }).join("");
   document.getElementById("convLista").innerHTML = CONVIV.map(function(c,i){
-    var det = [c.rel, c.edad && c.edad+" años", c.oficio].filter(Boolean).join(", ");
-    return '<span class="chip on">'+esc(det)+' <b data-convdel="'+i+'" style="cursor:pointer">×</b></span>';
+    return chipEditable("conv", i, convDet(c), " on", c.rev, '<b data-convdel="'+i+'" style="cursor:pointer">×</b>');
   }).join("");
+  document.getElementById("btnConv").textContent = EDIT && EDIT.k==="conv" ? "✓" : "+";
   document.getElementById("convChips").innerHTML = CHIPS_CONV
     .filter(function(v){ return !CONV_UNICO[v] || !CONVIV.some(function(c){ return c.rel===v; }); })
     .map(function(v){
@@ -1743,6 +1823,10 @@ var CONDUCTA_PA = {
 
 function avisos(){
   var a = [], t = String(F.animo||""), m = String(F.mac||""), tx = String(F.toxicos||""), rd = String(F.redes||"");
+  if(F.genero && /Automedicación hormonal/.test(String(F.tratGen||"")))
+    a.push("Automedicación hormonal: valorar riesgos y derivación a un equipo de salud integral.");
+  var rv = revisarPendiente();
+  if(rv.length) a.push("Revisar lo importado: "+unirYE(rv)+".");
   if(/Refiere ideas de muerte|Autolesiones/i.test(t))
     a.push(smSeguimiento() ? "Riesgo en salud mental, en seguimiento por Salud Mental: dejar pautas de alarma escritas."
                            : "Riesgo en salud mental: valorar interconsulta con Salud Mental y pautas de alarma escritas.");
@@ -1766,10 +1850,19 @@ function avisos(){
   return a;
 }
 
+function revisarPendiente(){
+  var o = [], N = {ap:"antecedentes personales", af:"antecedentes familiares", pend:"pendientes"};
+  ["ap","af"].forEach(function(k){ if(LISTAS[k].some(function(t){ return REV[rk(k,t)]; })) o.push(N[k]); });
+  if(PENDIENTES.some(function(t){ return REV[rk("pend",t)]; })) o.push(N.pend);
+  if(CONVIV.some(function(c){ return c.rev; })) o.push("convivientes");
+  if(REV.loc) o.push("localidad");
+  return o;
+}
 function smSeguimiento(){ return /En seguimiento por Salud Mental/i.test(String(F.animo||"")); }
 function chipsDx(){
   var a = antro(), esF = F.sexo==="F";
-  var l = [esF?"Adolescente sana.":"Adolescente sano.","Control de salud."];
+  var gn = genNota();
+  var l = [gn==="f" ? "Adolescente sana." : (gn==="m" ? "Adolescente sano." : "Adolescente en buen estado de salud."),"Control de salud."];
   if(a.imcC && a.imcC.c!=="ok") l.unshift(a.imcC.t.charAt(0).toUpperCase()+a.imcC.t.slice(1)+".");
   if(a.tC && a.tC.c!=="ok") l.push(a.tC.t.charAt(0).toUpperCase()+a.tC.t.slice(1)+" a estudiar.");
   if(F.adams==="positivo") l.push("Maniobra de Adams positiva. Escoliosis a estudiar.");
@@ -1920,9 +2013,11 @@ function construir(crudo){
   if(F.nombre.trim()) cab = F.nombre.trim() + (anios!=null ? " "+anios+" años" : "") + ".";
   var rel = F.acompRel.trim(), acn = F.acompNombre.trim();
   if(rel === "sin acompañante"){
-    cab = (cab?cab+" ":"") + "Concurre " + (esF?"sola":"solo") + ".";
+    var gc = genNota();
+    cab = (cab?cab+" ":"") + (gc==="n" ? "Concurre sin acompañante." : "Concurre " + (gc==="f"?"sola":"solo") + ".");
   } else if(rel || acn){
-    cab = (cab?cab+" ":"") + "Acompañad" + (esF?"a":"o") + " por " + [rel,acn].filter(Boolean).join(" ") + ".";
+    var ga = genNota();
+    cab = (cab?cab+" ":"") + (ga==="n" ? "Concurre con " : "Acompañad" + (ga==="f"?"a":"o") + " por ") + [rel,acn].filter(Boolean).join(" ") + ".";
   }
   var fnTxt = "";
   if(F.fn){
@@ -1931,6 +2026,7 @@ function construir(crudo){
   }
   if(cab || F.tel.trim() || fnTxt)
     L.push(unir([cab, F.tel.trim() && "TEL: "+F.tel.trim(), fnTxt]));
+  seg("identidad"); var idg = identidadTexto(); if(idg) L.push("* Identidad de género: "+idg);
 
   blk("MOTIVO DE CONSULTA");
   seg("motivoPac"); add("Motivo de consulta del paciente", F.motivoPac);
@@ -2094,6 +2190,7 @@ function construir(crudo){
 var DEST = {}, DEST_USADOS = 0;
 var DEST_FIJOS = {dx:1, conductas:1, obsConsulta:1};
 var DEST_AUTO = {
+  identidad: function(){ return /Automedicación hormonal/.test(String(F.tratGen||"")); },
   ap: function(){ return /TGL aumentados|Colesterol aumentado|GAA|Anemia hipocrómica microcítica|Perfil tiroideo alterado/i.test(String(F.lab||"")); },
   af: function(){ return LISTAS.af.some(function(x){ return /Muerte súbita/i.test(x); }); },
   vacunas: function(){ return /Pendiente|Sin carnet|Incompleta/i.test(String(F.vacunas||"")); },
@@ -2306,7 +2403,7 @@ document.addEventListener("input", function(e){
   if(esMenuMed(e.target)) return;
   if(eventoMed(e)) return;
   var k = e.target.getAttribute && e.target.getAttribute("data-k");
-  if(k){ F[k] = e.target.value; render(); }
+  if(k){ if(k==="localidad") delete REV.loc; F[k] = e.target.value; render(); }
 });
 document.addEventListener("click", function(e){
   var t = e.target.closest ? e.target.closest("button,b,h2[data-toggle]") : null;
@@ -2318,14 +2415,24 @@ document.addEventListener("click", function(e){
   }
   if(t.hasAttribute("data-goto")){
     var dest = document.getElementById(t.getAttribute("data-goto"));
-    CERRADAS[t.getAttribute("data-goto")] = false;
+    abrirSolo(t.getAttribute("data-goto"));
     render();
     if(dest && dest.scrollIntoView) dest.scrollIntoView({behavior:"smooth", block:"start"});
     return;
   }
   if(t.hasAttribute("data-toggle")){
     var sid = t.getAttribute("data-toggle");
-    CERRADAS[sid] = !CERRADAS[sid]; render(); return;
+    if(CERRADAS[sid]){
+      abrirSolo(sid); render();
+      var cs = document.getElementById(sid);
+      if(cs && cs.scrollIntoView) cs.scrollIntoView({behavior:"smooth", block:"start"});
+    } else { CERRADAS[sid] = true; render(); }
+    return;
+  }
+  if(t.hasAttribute("data-genero")){
+    var gv = t.getAttribute("data-genero");
+    F.genero = F.genero===gv ? "" : gv;
+    render(); return;
   }
   if(t.hasAttribute("data-sexo")){
     F.sexo = t.getAttribute("data-sexo");
@@ -2384,7 +2491,10 @@ document.addEventListener("click", function(e){
     EXTRAS.splice(Number(t.getAttribute("data-extra")),1); render(); return;
   }
   if(t.hasAttribute("data-pend")){
-    PENDIENTES.splice(Number(t.getAttribute("data-pend")),1); render(); return;
+    var pdi = Number(t.getAttribute("data-pend"));
+    if(EDIT && EDIT.k==="pend"){ EDIT = null; inputLista("pend").value = ""; }
+    delete REV[rk("pend", PENDIENTES[pdi])];
+    PENDIENTES.splice(pdi,1); render(); return;
   }
   if(t.hasAttribute("data-interdel")){
     INTER.splice(Number(t.getAttribute("data-interdel")),1); render(); return;
@@ -2439,14 +2549,29 @@ document.addEventListener("click", function(e){
   if(t.hasAttribute("data-repitdel")){
     REPIT.splice(Number(t.getAttribute("data-repitdel")),1); render(); return;
   }
+  if(t.hasAttribute("data-ledit")){
+    var ek = t.getAttribute("data-ledit"), ei = Number(t.getAttribute("data-i"));
+    var etx = ek==="conv" ? convDet(CONVIV[ei]) : (ek==="pend" ? PENDIENTES[ei] : LISTAS[ek][ei]);
+    EDIT = {k:ek, i:ei};
+    var ein = inputLista(ek);
+    if(ein){ ein.value = etx; }
+    render();
+    if(ein && ein.focus){ ein.focus(); try { ein.setSelectionRange(ein.value.length, ein.value.length); } catch(e){} }
+    return;
+  }
   if(t.hasAttribute("data-convdel")){
-    CONVIV.splice(Number(t.getAttribute("data-convdel")),1); render(); return;
+    var cdi = Number(t.getAttribute("data-convdel"));
+    if(EDIT && EDIT.k==="conv"){ EDIT = null; inputLista("conv").value = ""; }
+    CONVIV.splice(cdi,1); render(); return;
   }
   if(t.hasAttribute("data-convchip")){
     CONVIV.push({rel:t.getAttribute("data-convchip"), edad:"", oficio:""}); render(); return;
   }
   if(t.hasAttribute("data-listdel")){
-    LISTAS[t.getAttribute("data-listdel")].splice(Number(t.getAttribute("data-i")),1); render(); return;
+    var dk = t.getAttribute("data-listdel"), di = Number(t.getAttribute("data-i"));
+    if(EDIT && EDIT.k===dk){ EDIT = null; inputLista(dk).value = ""; }
+    delete REV[rk(dk, LISTAS[dk][di])];
+    LISTAS[dk].splice(di,1); render(); return;
   }
   if(t.hasAttribute("data-listaddchip")){
     LISTAS[t.getAttribute("data-listaddchip")].push(t.getAttribute("data-v")); render(); return;
@@ -2454,6 +2579,12 @@ document.addEventListener("click", function(e){
   if(t.hasAttribute("data-listadd")){
     var lk = t.getAttribute("data-listadd");
     var inp = document.querySelector('[data-listinput="'+lk+'"]'), tv = inp.value.trim();
+    if(EDIT && EDIT.k===lk){
+      var viejo = LISTAS[lk][EDIT.i];
+      delete REV[rk(lk, viejo)];
+      if(tv) LISTAS[lk][EDIT.i] = /[.]$/.test(tv)?tv:tv+".";
+      EDIT = null; inp.value = ""; render(); return;
+    }
     if(tv){ LISTAS[lk].push(/[.]$/.test(tv)?tv:tv+"."); inp.value=""; render(); }
     return;
   }
@@ -2487,6 +2618,7 @@ document.addEventListener("click", function(e){
     PEND2.push(t.getAttribute("data-addpend2")); render(); return;
   }
   if(t.hasAttribute("data-addpend")){
+    EDIT = EDIT && EDIT.k==="pend" ? null : EDIT;
     PENDIENTES.push(t.getAttribute("data-addpend")); render(); return;
   }
 });
@@ -2507,6 +2639,10 @@ function parseConviviente(txt){
 }
 document.getElementById("btnConv").onclick = function(){
   var i = document.getElementById("convLibre"), v = i.value.trim();
+  if(EDIT && EDIT.k==="conv"){
+    if(v) CONVIV[EDIT.i] = parseConviviente(v); else CONVIV[EDIT.i].rev = false;
+    EDIT = null; i.value = ""; render(); return;
+  }
   if(!v) return;
   CONVIV.push(parseConviviente(v)); i.value = ""; render();
 };
@@ -2534,6 +2670,11 @@ document.getElementById("nuevoPend2").addEventListener("keydown", function(e){
 
 document.getElementById("btnPend").onclick = function(){
   var i = document.getElementById("nuevoPend"), v = i.value.trim();
+  if(EDIT && EDIT.k==="pend"){
+    delete REV[rk("pend", PENDIENTES[EDIT.i])];
+    if(v) PENDIENTES[EDIT.i] = /[.]$/.test(v)?v:v+".";
+    EDIT = null; i.value = ""; render(); return;
+  }
   if(!v) return;
   PENDIENTES.push(/[.]$/.test(v)?v:v+"."); i.value=""; render();
 };
@@ -2626,7 +2767,7 @@ document.addEventListener("keydown", function(e){
 
 function iniciarConsulta(breve){
   limpiarTodo();
-  CERRADAS.sDocs = true;
+  cerrarInicial();
   F.breve = !!breve;
   T0 = Date.now(); TECLAS = 0; CLICS = 0;
   CONSULTA = String(Date.now());
@@ -2688,6 +2829,7 @@ function limpiarTodo(){
   var sexo = F.sexo;
   F = Object.assign({}, VACIO, {sexo:sexo});
   CONDUCTAS = new Set(); EXTRAS = []; ORDEN_COND = null; PENDIENTES = []; LISTAS = {ap:[], af:[]}; CONVIV = []; REPIT = []; PEND2 = [];
+  REV = {}; EDIT = null;
   MEDS = []; RP_AUTO = ""; RECETA_AUTO = false; pintarMeds();
   INTER = []; DOCS_SEL = {}; DIFERIDO = {}; DX = []; DEST = {}; AUTO_VISTAS = {}; CRUCES_VISTOS = {};
   sincronizarTodo();
@@ -2985,8 +3127,109 @@ var IMPORT_TXT = {
   "Obs. salud sexual":"obsSexual"
 };
 
+/* nota en prosa → chips: se prueba con los chips cuyo fragmento aparece en el texto;
+   si al redactarlos de nuevo sale el mismo texto, quedan los chips; si no, queda el texto tal cual */
+var IMP_PROSA = {
+  actFisica: function(){ return actFisicaTexto(); },
+  tiempoLibre: function(){ return listaChipsTexto(F.tiempoLibre, CHIPS.tiempoLibre, TL_NADA); },
+  redes: function(){ return redesTexto(); },
+  alimentacion: function(){ return alimTexto(); }
+};
+var IMP_FRAG = {"Diario.":"a diario","Uso para estudio.":"para estudio","Uso nocturno de pantallas.":"nocturno",
+  "Apuestas online: niega.":"niega apuestas online","Apuestas online: refiere.":"refiere apuestas online",
+  "Videojuegos: uso recreativo.":"videojuegos de forma recreativa","Verduras, carnes, lácteos y frutas.":"consume verduras, carnes, lácteos y frutas",
+  "No come carne.":"no come carne","No come verduras.":"verduras"};
+function normaliza(t){ return String(t||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function impProsa(k, val){
+  if(!IMP_PROSA[k]) return val;
+  var low = normaliza(val), ch = [];
+  CHIPS[k].forEach(function(c){
+    var fr = normaliza(IMP_FRAG[c] || sinPunto(c));
+    if(low.indexOf(fr)>=0) ch.push(c);
+  });
+  if(!ch.length) return val;
+  /* "verduras" solo cuenta como chip si dice "no come ... verduras" */
+  if(ch.indexOf("No come verduras.")>=0 && !/no come (carne ni )?verduras/.test(low)) ch.splice(ch.indexOf("No come verduras."),1);
+  var antes = F[k];
+  for(var intento=0; intento<2; intento++){
+    F[k] = ch.join(" ");
+    if(normaliza(IMP_PROSA[k]()) === low) return F[k];
+    /* segundo intento: sin los chips cuyo texto es parte de otro */
+    ch = ch.filter(function(c){ return !ch.some(function(d){ return d!==c && normaliza(sinPunto(d)).indexOf(normaliza(sinPunto(c)))>=0; }); });
+  }
+  F[k] = antes;
+  return val;
+}
+function impIdentidad(v){
+  if(/^Persona no binaria/.test(v)){ F.genero = "nb"; var sx = v.match(/Sexo asignado al nacer: (femenino|masculino)/); if(sx) F.sexo = sx[1]==="femenino" ? "F" : "M"; }
+  else if(/^Varón trans/.test(v)){ F.genero = "trans"; F.sexo = "F"; }
+  else if(/^Mujer trans/.test(v)){ F.genero = "trans"; F.sexo = "M"; }
+  var r = v.replace(/^(Persona no binaria\.( Sexo asignado al nacer: \w+\.)?|Varón trans\.|Mujer trans\.)\s*/,"");
+  if(/emiten con el nombre del DNI/.test(r)){ F.nombreDoc = "nombre del DNI"; r = r.replace(/Por razones de confidencialidad[^.]*\./,""); }
+  var tr = [];
+  Object.keys(TRAT_FRASE).forEach(function(c){ if(r.indexOf(TRAT_FRASE[c])>=0){ tr.push(c); r = r.replace(TRAT_FRASE[c],""); } });
+  F.tratGen = tr.join(" ");
+  F.idGenero = r.replace(/\s+/g," ").trim();
+}
+function impGinec(v){
+  var te = v.match(/Telarca a los (\d+(?:[.,]\d)?)/i), me = v.match(/[Mm]enarca a los (\d+(?:[.,]\d)?)/);
+  if(te) F.telarca = te[1]; if(me) F.menarca = me[1];
+  var t2 = v.match(/Telarca:\s*([^.]+)\./), m2 = v.match(/Menarca:\s*([^.]+)\./), rm = v.match(/RM:\s*([^\s]+?)\.(\s|$)/);
+  if(t2) F.telarca = t2[1].trim(); if(m2) F.menarca = m2[1].trim(); if(rm) F.rm = rm[1];
+  if(/Niega dismenorrea/.test(v)) F.dismenorrea = "Niega.";
+  var dm = v.match(/Dismenorrea (leve|moderada|severa)/i);
+  if(dm) F.dismenorrea = mayus1(dm[1].toLowerCase())+".";
+  (CHIPS.gm||[]).forEach(function(c){ if(v.indexOf(c)>=0) F.gm = c; });
+}
+function impSexual(v){
+  if(/Niega pareja e inicio de relaciones sexuales/.test(v)){ F.pareja = "Niega."; F.irs = "Niega."; }
+  if(/Niega pareja\./.test(v)) F.pareja = "Niega.";
+  if(/Refiere pareja, sin asimetría ni coerción/.test(v)) F.pareja = "Sí, sin asimetría ni coerción.";
+  if(/Niega inicio de relaciones sexuales/.test(v)) F.irs = "Niega.";
+  if(/Inició relaciones sexuales/.test(v)) F.irs = "Sí.";
+  var mac = [];
+  Object.keys(MAC_FRASE).forEach(function(c){ if(v.indexOf(MAC_FRASE[c])>=0) mac.push(c); });
+  var us = v.match(/Usa ([^.]+)\./);
+  if(us) Object.keys(MAC_MET).forEach(function(c){ if(new RegExp("(^|, | y | e )"+MAC_MET[c]+"(,| y | e |$)").test(us[1])) mac.push(c); });
+  ["No usa método de barrera.","Sabe de AHE.","Se ofrece consejería."].forEach(function(c){ if(v.indexOf(c)>=0) mac.push(c); });
+  if(mac.length) F.mac = CHIPS.mac.filter(function(c){ return mac.indexOf(c)>=0; }).join(" ");
+  Object.keys(ESI_FRASE).forEach(function(c){ if(v.indexOf(ESI_FRASE[c])>=0) F.esi = c; });
+}
+function escolaridadDesdeProsa(v){
+  v = v.replace(/(\d)\.(?:er|º)/g, function(m,d){ return ORD[d] || d; });
+  var fe = v.match(/(Cursa estudios [^.]*?|Realiza (?:un curso|curso de [^.,]*?)), con ([^.]+)\./);
+  if(fe){
+    var cf = [];
+    if(/buen rendimiento/.test(fe[2])) cf.push("Buen rendimiento.");
+    if(/dificultades en el rendimiento/.test(fe[2])) cf.push("Con dificultades en el rendimiento.");
+    if(/ausentismo reiterado/.test(fe[2])) cf.push("Ausentismo reiterado.");
+    if(/docentes y compañeros/.test(fe[2])) cf.push(REL_COMP, REL_DOC);
+    else if(/con compañeros/.test(fe[2])) cf.push(REL_COMP); else if(/con docentes/.test(fe[2])) cf.push(REL_DOC);
+    v = v.replace(fe[0], fe[1]+". "+cf.join(" "));
+    return v.replace(/\s+/g," ").trim();
+  }
+  var chips = [];
+  var m = v.match(/^(?:Cursa ([^,.]+)|Concurre (?:al turno \w+|en doble jornada|a escuela técnica)|Presenta)([^.]*)\./);
+  if(m){
+    var cab = m[0], curso = m[1] || "";
+    if(/escuela técnica/.test(cab)) chips.push("Escuela técnica.");
+    var turno = (cab.match(/turno (mañana|tarde|noche)/)||[])[1] || (/doble jornada/.test(cab) ? "doble jornada" : "");
+    curso = curso.replace(/\s+(en escuela técnica|en el turno \w+|en doble jornada|de doble jornada).*$/,"");
+    var con = (cab.match(/,? con (.+)\.$/)||[])[1] || (cab.match(/^Presenta (.+)\.$/)||[])[1] || "";
+    if(/buen rendimiento/.test(con)) chips.push("Buen rendimiento.");
+    if(/dificultades en el rendimiento/.test(con)) chips.push("Con dificultades en el rendimiento.");
+    if(/ausentismo reiterado/.test(con)) chips.push("Ausentismo reiterado.");
+    if(/buena relación con docentes y compañeros/.test(con)) chips.push(REL_COMP, REL_DOC);
+    else if(/buena relación con compañeros/.test(con)) chips.push(REL_COMP);
+    else if(/buena relación con docentes/.test(con)) chips.push(REL_DOC);
+    var nuevo = (curso ? curso+". " : "") + (turno ? "Turno "+turno+". " : "") + chips.join(" ");
+    v = v.replace(cab, nuevo.trim());
+  }
+  return v.replace(/\s+/g," ").trim();
+}
 function impEscolaridad(v){
   F.escEstado = ""; F.egresoAnio = ""; F.estudioTipo = ""; F.estudioQue = ""; F.abandonoCausa = "";
+  v = escolaridadDesdeProsa(v);
   var fin = v.match(/Secundario finalizado(?:\s+en\s+(\d{4}))?\./i);
   if(fin){
     F.escEstado = "Finalizada"; F.egresoAnio = fin[1] || "";
@@ -3041,12 +3284,12 @@ function importar(txt){
     var it = l.match(/^\s+-\s+(.*)$/);
     if(it){
       var v = it[1].trim();
-      if(ctx==="ap" || ctx==="af"){ LISTAS[ctx].push(v); n++; }
-      else if(ctx==="pendprev"){ PENDIENTES.push(v); n++; }
+      if(ctx==="ap" || ctx==="af"){ LISTAS[ctx].push(v); REV[rk(ctx,v)] = 1; n++; }
+      else if(ctx==="pendprev"){ PENDIENTES.push(v); REV[rk("pend",v)] = 1; n++; }
       else if(ctx==="conv"){
         var d = parseConviviente(v);
         var ya = CONVIV.filter(function(c){ return c.rel===d.rel && !c.edad && !c.oficio; })[0];
-        if(ya){ ya.edad = d.edad; ya.oficio = d.oficio; } else { CONVIV.push(d); }
+        if(ya){ ya.edad = d.edad; ya.oficio = d.oficio; } else { d.rev = true; CONVIV.push(d); }
         n++;
       }
       return;
@@ -3099,17 +3342,20 @@ function importar(txt){
           veces = PAL[mn[1].toLowerCase()] || Number(mn[1]) || 1;
           q = singularRel(mn[2].trim());
         }
-        for(var z=0; z<veces; z++) CONVIV.push({rel:q, edad:"", oficio:""});
+        for(var z=0; z<veces; z++) CONVIV.push({rel:q, edad:"", oficio:"", rev:true});
       });
-      if(mv[2]) F.localidad = mv[2].trim();
+      if(mv[2]){ F.localidad = mv[2].trim(); REV.loc = 1; }
       n++; return;
     }
     if(/^Pendientes para la próxima consulta:/.test(cuerpo)){
       ctx = "pendprev";
       var vp = cuerpo.replace(/^Pendientes para la próxima consulta:\s*/,"").trim();
-      if(vp){ PENDIENTES.push(vp); n++; }
+      if(vp){ PENDIENTES.push(vp); REV[rk("pend",vp)] = 1; n++; }
       return;
     }
+    if(/^Identidad de género:/.test(cuerpo)){ impIdentidad(cuerpo.replace(/^Identidad de género:\s*/,"")); ctx=null; n++; return; }
+    if(/^(Telarca|Menarca) a los|^(Telarca|Menarca|FUM|RM):|^(Niega )?[Dd]ismenorrea\b/.test(cuerpo) && !/\s{3,}/.test(cuerpo)){ impGinec(cuerpo); ctx=null; n++; return; }
+    if(/^(Niega pareja|Refiere pareja|Niega inicio de relaciones|Inició relaciones)/.test(cuerpo)){ impSexual(cuerpo); ctx=null; n++; return; }
     if(/^Escolaridad:/.test(cuerpo)){ impEscolaridad(cuerpo.replace(/^Escolaridad:\s*/,"")); ctx=null; n++; return; }
     if(/^AO:/.test(cuerpo)){
       var ao = cuerpo.replace(/^AO:\s*/,"");
@@ -3128,15 +3374,17 @@ function importar(txt){
       if((et==="AP" || et==="AF") ){
         ctx = et.toLowerCase();
         LISTAS[ctx] = val ? [val] : [];
+        if(val) REV[rk(ctx,val)] = 1;
         if(val) n++;
         return;
       }
       if(et==="Act. extracurricular" || et==="Hobbie"){   /* notas anteriores a la v3.5 */
         F.tiempoLibre = unirTiempoLibre(F.tiempoLibre, val); n++; return;
       }
-      if(et==="Tiempo libre"){ F.tiempoLibre = unirTiempoLibre(val); n++; return; }
+      if(et==="Tiempo libre"){ F.tiempoLibre = impProsa("tiempoLibre", unirTiempoLibre(val)); n++; return; }
       var k = IMPORT_TXT[et];
-      if(k){ F[k] = val; n++; }
+      if(k==="localidad") REV.loc = 1;
+      if(k){ F[k] = impProsa(k, val); n++; }
     });
   });
   return n;
@@ -3195,7 +3443,7 @@ function aplicar(p){
   INTER = INTER.filter(function(x){ return !x.origen; });
   sincronizarTodo();
   EXTRAS = (p.extras||[]).slice(); ORDEN_COND = null;
-  PENDIENTES = []; LISTAS = {ap:[], af:[]}; CONVIV = []; REPIT = [];
+  PENDIENTES = []; LISTAS = {ap:[], af:[]}; CONVIV = []; REPIT = []; REV = {}; EDIT = null;
   volcar(); render();
 }
 
@@ -3606,7 +3854,7 @@ function edadDoc(){
   return ms==null ? "" : String(Math.floor(ms/12));
 }
 function nombreCompleto(){
-  var a = F.apellido.trim(), n = F.nombre.trim();
+  var a = F.apellido.trim(), n = (F.genero && F.nombreDoc==="nombre del DNI" && F.nombreDni.trim()) ? F.nombreDni.trim() : F.nombre.trim();
   return (a && n) ? (a+", "+n) : (a || n);
 }
 
@@ -3799,7 +4047,7 @@ function armarDocs(){
       + '<h3 style="text-align:center;text-decoration:underline;margin:10px 0 14px">CONSTANCIA DE APTO FÍSICO</h3>'
       + '<p style="text-align:justify">Se deja constancia que <b>'+pt(esc(nom))+'</b> DNI '+pt(esc(dni))
       + ' de '+(ed||"……")+' años de edad cuya historia clínica queda en poder de la institución ha sido '
-      + (esF?"evaluada":"evaluado")
+      + ({f:"evaluada", m:"evaluado", n:"evaluado/a"})[genDoc()]
       + ' clínicamente en el día de la fecha y se encuentra en condiciones de salud para realizar actividades físicas '
       + 'y deportivas acordes a su edad, sexo, estadio madurativo y tolerancia, bajo supervisión de personal idóneo.</p>'
       + '<p>Observaciones: '+(F.docObs.trim()?esc(F.docObs.trim()):"………………………………………………………………………………………………………")+'</p>'
