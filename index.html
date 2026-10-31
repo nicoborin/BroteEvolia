@@ -211,6 +211,8 @@
   .recFu{color:#71717a;margin-top:4px;font-size:11px}
   .punto.rec{box-shadow:0 0 0 2px #f59e0b}
   .fila2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+  .anioMini{flex:none;width:auto !important;margin:0 !important}
+  .anioMini button{padding:6px 9px !important;font-size:12px !important}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2F3A8F">
@@ -682,19 +684,14 @@ function enumConviv(){
   return orden.map(function(r){ var n = cuenta[r]; return n>1 ? (NUM_PAL[n]||n)+" "+pluralRel(r) : r; });
 }
 var CHIPS_LISTA = {
-  ap:["Sin antecedentes de relevancia.","RNT/PAEG, sin patología perinatal.","Asma en seguimiento.",
-      "Obesidad, en seguimiento por nutrición.","Psicología, terapia semanal.","Sin internaciones ni cirugías.",
-      "Sin alergias conocidas.","Sin medicación habitual."],
+  ap:["Sin antecedentes de relevancia."],
   af:["Sin antecedentes de relevancia.","HTA y DBT2 en abuelos.","Dislipemia en padre.",
       "Obesidad en la familia.","Enfermedad tiroidea en la madre.","Muerte súbita en familiar de primer grado."]
 };
 var CHIPS_PEND = [
   "Trajo laboratorio, dentro de parámetros normales.",
-  "No trajo el laboratorio solicitado.",
-  "Psicología: consiguió turno y comenzó tratamiento.",
-  "Psicología: aún sin turno asignado.",
-  "Trajo valoración cardiológica.",
-  "Trajo valoración oftalmológica."
+  "Valoración cardiológica normal.",
+  "Valoración oftalmológica normal."
 ];
 
 var BASE = [
@@ -725,7 +722,7 @@ var RIESGO_MEDIO = ["Consumo social de alcohol.","Vapeo ocasional.","Cannabis: c
   "Acné moderado inflamatorio.","Bocio.","Estrías de distensión.","Soplo sistólico funcional.",
   "Varicocele izquierdo.","Hidrocele.","Fimosis.","Hernia inguinal.","Cambia 5 o más toallitas por día.",
   "Conciliación dificultosa.","Consolidación dificultosa.","Sin agua de red ni cloacas.","Alta dependencia económica.",
-  "Hace más de 2 años.","Sin controles previos.","No recibe."];
+  "Hace más de 2 años.","Sin controles previos.","Sin controles recientes.","No recibe."];
 /* excepciones por campo: mismo texto, distinto color según el campo */
 var TL_NADA = "No realiza actividades extras.";
 var RIESGO_CAMPO = {dismenorrea:{"Moderada.":" medio","Severa.":" alto"}};
@@ -764,10 +761,10 @@ var CHIPS_SUMA = {tratGen:1, redes:1, toxicos:1, alimentacion:1, mac:1, sueno:1,
 
 var CHIPS = {
   acompRel:["su madre","su padre","sus padres","su abuela","su hermana","su tía","sin acompañante"],
-  motivoPac:["No sabe.","Trae estudios.","Control de pendientes.","Control de salud.","Control de salud. Apto físico.","Control con resultados.","Refiere no tener motivo propio."],
-  motivoAcomp:["Trae estudios.","Control de pendientes.","Control de salud.","Coincide con el del paciente.","Sin motivo adicional.","Consulta por conducta en el hogar.","Consulta por rendimiento escolar."],
-  ultimaConsulta:["Primera consulta en el servicio.","Hace 45 días.","Hace 3 meses.","Hace 6 meses.","Hace 1 año.","Hace más de 2 años.","Sin controles previos."],
-  intercurrencias:["Niega.","Sin consultas médicas en el período.","Una consulta en guardia, resuelta.","Cuadro respiratorio, resuelto."],
+  motivoPac:["Control de salud.","Control de salud. Apto físico.","No sabe.","Control de pendientes."],
+  motivoAcomp:["Control de salud.","Control de salud. Apto físico.","No sabe.","Control de pendientes."],
+  ultimaConsulta:["Hace 45 días.","Hace 3 meses.","Hace 6 meses.","Hace 1 año.","Sin controles recientes."],
+  intercurrencias:["Niega."],
   visual:["Agudeza conservada.","Usa lentes.","Miopía.","Astigmatismo.","Hipermetropía.","Sin control previo."],
   cardio:["ECG normal.","Ecocardiograma Doppler normal.","Apto para actividad física.","Sin control previo."],
   lab:["Normal.","GAA.","TGL aumentados.","Colesterol aumentado.","Anemia hipocrómica microcítica.",
@@ -775,7 +772,7 @@ var CHIPS = {
   nbi:["Niega.","Hacinamiento.","Vivienda precaria.","Sin agua de red ni cloacas.",
     "Deserción escolar en el hogar.","Alta dependencia económica."],
   auh:["Percibe.","No percibe.","En trámite."],
-  vacunas:["Completas para la edad.","Pendiente esquema de 11 años.","Pendiente VPH.","Sin carnet, se solicita.","Refiere carnet completo; no lo trae a la consulta. Se solicita."],
+  vacunas:["Completas para la edad.","Pendiente esquema de 11 años.","Pendiente VPH.","Refiere carnet completo; no lo trae a la consulta. Se solicita."],
   rendimiento:["Buen rendimiento.","Con dificultades en el rendimiento.","Ausentismo reiterado.",
     "Escuela técnica.",
     "Buena relación con compañeros.","Buena relación con docentes."],
@@ -1170,6 +1167,13 @@ function campo(k,label,o){
   return '<div class="f'+(o.sub?" sub":"")+'"><label>'+label+'</label>'+ctrl
        + (CHIPS[k]?'<div class="chips" data-k="'+k+'"></div>':'') + '</div>';
 }
+/* campo con año del estudio en un menú desplegable */
+function campoAnio(k,label){
+  return '<div class="f sub"><label>'+label+'</label>'
+    + '<div style="display:flex;gap:8px;align-items:center"><input data-k="'+k+'" style="flex:1">'
+    + '<div class="tanner prader anioMini" data-anio="'+k+'Anio" title="Año del estudio"></div></div>'
+    + '<div class="chips" data-k="'+k+'"></div></div>';
+}
 function bloqueLista(k,label,ph){
   return '<div class="f"><label>'+label+'</label>'
     + '<div class="chips" data-lista="'+k+'"></div>'
@@ -1232,12 +1236,9 @@ var SECCIONES = [
  + bloqueLista("ap","AP · antecedentes personales","Agregar antecedente (escribí y elegí: asma, celiaquía...)")
  + '<datalist id="apSug">'+REC_AP.map(function(p){ return '<option value="'+esc(p.n)+'.">'; }).join("")+'</datalist>'
  + '<div id="recResumen"></div>'
- + campo("visual","Agudeza visual",{sub:true})
- + '<div class="f sub"><label>Agudeza visual — año del estudio</label><div class="tanner prader" data-anio="visualAnio"></div></div>'
- + campo("cardio","Valoración cardiológica",{sub:true})
- + '<div class="f sub"><label>Valoración cardiológica — año del estudio</label><div class="tanner prader" data-anio="cardioAnio"></div></div>'
- + campo("lab","Último laboratorio",{sub:true})
- + '<div class="f sub"><label>Laboratorio — año del estudio</label><div class="tanner prader" data-anio="labAnio"></div></div>'
+ + campoAnio("visual","Agudeza visual")
+ + campoAnio("cardio","Valoración cardiológica")
+ + campoAnio("lab","Último laboratorio")
  + bloqueLista("af","AF · antecedentes familiares","Agregar antecedente")
  + campo("vacunas","Vacunas")
  + '<div class="chips" style="margin:-4px 0 8px"><button class="chip" data-vacx="gripeOn">+ Antigripal</button><button class="chip" data-vacx="dengueOn">+ Dengue</button></div>'
@@ -1551,7 +1552,7 @@ function pintarSegmentos(){
   botones("turno",["mañana","tarde","noche","doble jornada"]);
   botones("repitTipo",["grado","año"]);
   var hoyA = new Date().getFullYear();
-  var anios5 = [hoyA-4, hoyA-3, hoyA-2, hoyA-1, hoyA];
+  var anios5 = [hoyA-2, hoyA-1, hoyA];
   ["visualAnio","cardioAnio","labAnio"].forEach(function(k){
     var cont = document.querySelector('[data-anio="'+k+'"]');
     if(!cont) return;
@@ -2377,7 +2378,7 @@ function construir(crudo){
 
   blk("MOTIVO DE CONSULTA");
   seg("motivoPac"); add("Motivo de consulta del paciente", F.motivoPac);
-  seg("motivoAcomp"); add("Motivo de consulta del acompañante", F.motivoAcomp);
+  seg("motivoAcomp"); if(String(F.motivoAcomp||"").trim()!==String(F.motivoPac||"").trim()) add("Motivo de consulta del acompañante", F.motivoAcomp);
   seg("ultimaConsulta"); add("Última consulta", F.ultimaConsulta);
   seg("pendientes"); if(PENDIENTES.length === 1){
     L.push("* Pendientes: "+PENDIENTES[0]);
@@ -2702,8 +2703,9 @@ function pintarRec(){
   }).join("");
 }
 /* anticonceptivo oral */
-function acoEsq(e){ return e==="21" ? "21 comprimidos" : (e==="28" ? "28 comprimidos" : (e==="28 continuo" ? "toma continua" : e)); }
-function acoTexto(a){ return a.d + (a.e ? ", "+acoEsq(a.e) : "") + " (" + (a.est ? "entrega estatal" : a.m) + ")"; }
+/* cantidad de comprimidos: solo para que otra marca respete la misma cantidad */
+function acoEsq(e){ return e==="28 continuo" ? "28" : (e==="6 + 5 + 10" ? "21" : e); }
+function acoTexto(a){ return (a.est ? "" : a.m+", ") + a.d + (a.e ? " ("+acoEsq(a.e)+")" : ""); }
 function acoFrase(){
   var t = String(F.macAco||"").trim().replace(/\.+$/,""), tipo = "";
   var a = ACO.filter(function(x){ return acoTexto(x)===t; })[0];
@@ -2809,7 +2811,7 @@ function pintarV44(){
   var sg = document.getElementById("acoSug");
   if(sg) sg.innerHTML = m.indexOf("Anticonceptivo oral.")<0 ? "" : acoSugerencias().map(function(x){
     var a = x.a;
-    return '<button class="chip" data-acosel="'+x.i+'" style="text-align:left">'+(a.est ? "🏛 Entrega estatal" : esc(a.m))+' — '+esc(a.d)+(a.e ? ", "+esc(acoEsq(a.e)) : "")+'</button>';
+    return '<button class="chip" data-acosel="'+x.i+'" style="text-align:left">'+(a.est ? "🏛 Entrega estatal" : esc(a.m))+' — '+esc(a.d)+(a.e ? " ("+esc(acoEsq(a.e))+")" : "")+'</button>';
   }).join("");
   var ll = document.getElementById("larcLect"), av = larcAvisos(), notas = [];
   if(m.indexOf("Implante subdérmico.")>=0 && String(F.impFecha||"").trim()) notas.push("Implante: 5 años (comunicado del Ministerio de Salud GCBA).");
@@ -2877,12 +2879,12 @@ function render(){
     .forEach(function(par){
       var cont = document.querySelector('[data-anio="'+par[0]+'"]');
       if(!cont) return;
-      var vieja = cont.parentNode.querySelector(".antig");
+      var vieja = cont.closest(".f").querySelector(".antig");
       if(vieja) vieja.remove();
       var v = F[par[0]];
       if(!v) return;
       var dif = hoyAA - Number(v);
-      var txt = v==="previo" ? "Anterior a "+(hoyAA-4)+"."
+      var txt = v==="previo" ? "Anterior a "+(hoyAA-2)+"."
               : dif===0 ? "De este año."
               : "Hace "+dif+" año"+(dif===1?"":"s")+".";
       var p = document.createElement("p");
@@ -2891,7 +2893,7 @@ function render(){
       if(par[0]==="visualAnio")
         txt += " Control recomendado: anual con antecedentes, cada dos años sin ellos (Sociedad Argentina de Oftalmología Infantil).";
       p.textContent = txt;
-      cont.parentNode.appendChild(p);
+      cont.closest(".f").appendChild(p);
     });
 
   var lo = lecturaOrq(), cajaOrq = document.getElementById("avisoOrq");
