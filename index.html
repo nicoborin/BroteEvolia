@@ -311,6 +311,64 @@
   }
   body.hojas .fPleg{display:none !important}
   body.hojas .lchip[data-abrirtxt]{font-size:11px;color:#71717a;margin-top:4px}
+
+  /* pantallas grandes (1920×1080): más ancho, letra normal y solapas más grandes */
+  @media (min-width:1600px){
+    body.hojas main, body.hojas:not(.conSalida) main{max-width:1860px}
+    body.hojas:not(.conSalida) main{grid-template-columns:minmax(0,1fr) 52px}
+    body.hojas main{grid-template-columns:minmax(0,1fr) 52px 420px}
+    body.hojas #nav > button{width:52px;font-size:13px;letter-spacing:.04em}
+    body.hojas #nav > button.on{width:58px}
+    body.hojas section.card{padding:16px 20px}
+    body.hojas section.card h2{font-size:16px;margin-bottom:12px}
+    body.hojas .cuerpo{column-gap:16px}
+    body.hojas .cuerpo label{font-size:11.5px}
+    body.hojas .cuerpo input, body.hojas .cuerpo textarea, body.hojas .cuerpo select{font-size:15px;padding:7px 10px}
+    body.hojas .cuerpo .chip{font-size:12.5px;padding:3px 9px}
+    body.hojas .cuerpo .chips{gap:5px;margin-top:6px}
+    body.hojas .cuerpo .tanner button{font-size:13.5px;padding:6px 10px}
+    body.hojas .cuerpo > .f:not([hidden]), body.hojas .cuerpo > .grid2:not([hidden]), body.hojas .cuerpo > div:not(.chips):not(.recAP):not(.hojaPie):not([hidden]),
+    body.hojas .cuerpo > .hojaMulti > .f:not([hidden]), body.hojas .cuerpo > .hojaMulti > div:not([hidden]):not(.chips){padding:10px 12px;margin-bottom:11px}
+    body.hojas .txfila{grid-template-columns:100px 1fr}
+    body.hojas .txfila .txnom{font-size:13px}
+    body.hojas .txfila .tanner button{font-size:12.5px;padding:5px 6px}
+    body.hojas header{padding:10px 20px}
+    body.hojas .barra .btn, body.hojas .barra .grupo button{font-size:13.5px;padding:8px 14px}
+  }
+
+  /* secciones de una misma solapa: una sola hoja */
+  body.hojas #form > section.card.activa:not(.gUltima){margin-bottom:0;border-bottom-left-radius:0;padding-bottom:4px}
+  body.hojas #form > section.card.activa:not(.gPrimera){margin-top:0;border-top-left-radius:0;box-shadow:none;padding-top:6px}
+  body.hojas #form > section.card.activa{min-height:0 !important}
+  body.hojas #form > section.card.activa.gUltima{min-height:0}
+  body.hojas #form > section.card.activa:not(.gPrimera) h2{border-top:1px dashed color-mix(in srgb,var(--hc) 35%,#fff);padding-top:10px}
+  body.hojas #form{gap:0 !important}
+  body.hojas #nav > button[hidden]{display:none !important}
+
+  /* flujo único: todas las secciones de la solapa en las mismas columnas */
+  body.hojas #form{column-count:var(--cols,3);column-gap:16px;background:color-mix(in srgb,var(--gc,#2F3A8F) 9%,#fff);border-right:6px solid var(--gc,#2F3A8F);
+    border-radius:12px 0 0 12px;padding:14px 18px;align-self:start}
+  body.hojas #form > section.card.activa{display:contents !important}
+  body.hojas #form > section.card.activa > .cuerpo{display:contents}
+  body.hojas #form > section.card.activa h2{break-after:avoid;margin:4px 0 8px !important;border:0 !important;padding:0 !important}
+  body.hojas .hojaPie{column-span:all}
+  @media (min-width:1600px){ body.hojas:not(.conSalida) #form{--cols:4} body.hojas.conSalida #form{--cols:3} }
+  body.hojas .hojaPie{margin-top:0;padding-top:4px}
+  body.hojas .hojaPie button{padding:3px 10px}
+  body.hojas #form{padding:10px 16px}
+
+  /* solapas nítidas: sin transparencia ni desplazamientos (pixelaban el texto vertical) */
+  @media (min-width:1181px){
+    body.hojas #nav > button{opacity:1 !important;transform:none !important;transition:background .12s;
+      background:color-mix(in srgb,var(--hc) 20%,#fff);color:color-mix(in srgb,var(--hc) 80%,#000);
+      box-shadow:inset 3px 0 0 color-mix(in srgb,var(--hc) 45%,#fff);
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-weight:700}
+    body.hojas #nav > button:hover{background:color-mix(in srgb,var(--hc) 32%,#fff);color:color-mix(in srgb,var(--hc) 85%,#000)}
+    body.hojas #nav > button.on{background:var(--hc);color:#fff;box-shadow:none}
+    body.hojas #nav > button .punto{background:color-mix(in srgb,var(--hc) 45%,#fff) !important}
+    body.hojas #nav > button.on .punto{background:rgba(255,255,255,.7) !important}
+  }
+  @media (min-width:1600px){ body.hojas #nav > button{font-size:14px;letter-spacing:.02em} }
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2F3A8F">
@@ -1416,7 +1474,7 @@ var SECCIONES = [
  + campo("obsSueno","Sueño — texto libre",{sub:true,ph:"Se suma al final del mismo renglón"})
  + campo("obsCotidiana","Texto libre",{area:true,ph:"Algo fuera de lo común en hábitos"})
   },
-  {id:"sAnimo", t:"Situación anímica", h: ""
+  {id:"sAnimo", t:"Consumo y situación anímica", h: ""
 
  + campo("animo","Situación anímica",{ph:"Se siente bien, tiene red de contención"})
  + '<div id="animoTemp">'+TEMP.map(tempFila).join("")+'</div>'
@@ -1571,13 +1629,13 @@ function pintarHojas(){
   if(act) Array.prototype.forEach.call(act.querySelector(".cuerpo").children, function(ch){
     if(ch.classList.contains("hojaPie") || ch.classList.contains("recAP")) return;
     var vis = Array.prototype.some.call(ch.querySelectorAll("input,textarea,select,button"), function(x){ return x.offsetParent!==null; })
-      || (ch.innerText||ch.textContent||"").trim().length>0;
+      || (ch.innerText!==undefined ? ch.innerText : ch.textContent||"").trim().length>0;
     ch.classList.toggle("hojaVacio", !vis);
     if(!ch.classList.contains("f") && ch.querySelectorAll(":scope > .f, :scope > .grid2, :scope > div").length>=3){
       ch.classList.remove("hojaMulti");
       ch.classList.toggle("hojaMulti", ch.offsetHeight>400);
       if(ch.classList.contains("hojaMulti")) Array.prototype.forEach.call(ch.children, function(n){
-        var v2 = Array.prototype.some.call(n.querySelectorAll("input,textarea,select,button"), function(x){ return x.offsetParent!==null; }) || (n.innerText||n.textContent||"").trim().length>0;
+        var v2 = Array.prototype.some.call(n.querySelectorAll("input,textarea,select,button"), function(x){ return x.offsetParent!==null; }) || (n.innerText!==undefined ? n.innerText : n.textContent||"").trim().length>0;
         n.classList.toggle("hojaVacio", !v2);
       });
     } else ch.classList.remove("hojaMulti");
@@ -1590,7 +1648,7 @@ function pintarHojas(){
   });
 }
 function ordenarHabitos(){
-  var c = document.querySelector("#sHabitos .cuerpo"), tx = document.getElementById("wrapTx");
+  var c = document.querySelector("#sAnimo .cuerpo"), tx = document.getElementById("wrapTx");
   if(!c || !tx || c.dataset.ord) return;
   var otros = document.querySelector('#sHabitos [data-k="toxicos"]'), fo = otros && otros.closest(".f");
   c.insertBefore(tx, c.firstElementChild);
@@ -1615,6 +1673,71 @@ document.addEventListener("click", function(e){
   var b = e.target.closest && e.target.closest("[data-abrirtxt]");
   if(b){ TXT_ABIERTO[b.getAttribute("data-abrirtxt")] = 1; render(); var i = document.querySelector('#form [data-k="'+b.getAttribute("data-abrirtxt")+'"]'); if(i) i.focus(); }
 }, true);
+
+/* ===== solapas agrupadas: cada solapa muestra varias secciones ===== */
+var GRUPOS = [
+  {n:"Consulta",     c:"#2F3A8F", s:["sPaciente","sMotivo","sAntec"]},
+  {n:"Vida diaria",  c:"#C2410C", s:["sSocial","sCotidiana","sHabitos"]},
+  {n:"Consumo y ánimo", c:"#7E22CE", s:["sAnimo"]},
+  {n:"SSyR",         c:"#BE185D", s:["sSexual"]},
+  {n:"Examen",       c:"#15803D", s:["sExamen"]},
+  {n:"Diagnóstico",  c:"#B91C1C", s:["sCierre"]},
+  {n:"Docs",         c:"#57534E", s:["sDocs"]}];
+function grupoDe(id){ for(var i=0;i<GRUPOS.length;i++) if(GRUPOS[i].s.indexOf(id)>=0) return GRUPOS[i]; return null; }
+GRUPOS.forEach(function(g){ g.s.forEach(function(id){ HOJA_COL[id] = g.c; HOJA_CORTO[id] = g.n; }); });
+function marcarVacios(c){
+  Array.prototype.forEach.call(c.querySelector(".cuerpo").children, function(ch){
+    if(ch.classList.contains("hojaPie") || ch.classList.contains("recAP")) return;
+    ch.classList.remove("hojaVacio");
+    var vis = Array.prototype.some.call(ch.querySelectorAll("input,textarea,select,button"), function(x){ return x.offsetParent!==null; })
+      || (ch.innerText!==undefined ? ch.innerText : ch.textContent||"").trim().length>0;
+    ch.classList.toggle("hojaVacio", !vis);
+    if(!ch.classList.contains("f") && ch.querySelectorAll(":scope > .f, :scope > .grid2, :scope > div").length>=3){
+      ch.classList.remove("hojaMulti");
+      ch.classList.toggle("hojaMulti", ch.offsetHeight>400);
+      if(ch.classList.contains("hojaMulti")) Array.prototype.forEach.call(ch.children, function(n){
+        n.classList.remove("hojaVacio");
+        var v2 = Array.prototype.some.call(n.querySelectorAll("input,textarea,select,button"), function(x){ return x.offsetParent!==null; }) || (n.innerText!==undefined ? n.innerText : n.textContent||"").trim().length>0;
+        n.classList.toggle("hojaVacio", !v2);
+      });
+    } else ch.classList.remove("hojaMulti");
+  });
+}
+pintarHojas = function(){
+  var gs = GRUPOS.map(function(g){ return {g:g, s:g.s.filter(hojaVisible)}; }).filter(function(x){ return x.s.length; });
+  if(!hojaVisible(HOJA)) HOJA = gs[0].s[0];
+  var gi = 0; gs.forEach(function(x, i){ if(x.s.indexOf(HOJA)>=0) gi = i; });
+  var act = gs[gi];
+  SECCIONES.forEach(function(sec){
+    CERRADAS[sec.id] = false;
+    var c = document.getElementById(sec.id); if(!c) return;
+    c.classList.remove("cerrada");
+    var en = act.s.indexOf(sec.id)>=0, pos = act.s.indexOf(sec.id);
+    c.classList.toggle("activa", en);
+    c.classList.toggle("gPrimera", en && pos===0);
+    c.classList.toggle("gUltima", en && pos===act.s.length-1);
+    c.style.setProperty("--hc", HOJA_COL[sec.id]);
+    var pie = document.getElementById("pie_"+sec.id);
+    if(!pie){ pie = document.createElement("div"); pie.className = "hojaPie"; pie.id = "pie_"+sec.id; c.querySelector(".cuerpo").appendChild(pie); }
+    if(en && pos===act.s.length-1){
+      var ant = gs[gi-1], sig = gs[gi+1];
+      pie.hidden = false;
+      pie.innerHTML = (ant ? '<button data-goto="'+ant.s[0]+'">← '+ant.g.n+'</button>' : '<span></span>')
+        + (sig ? '<button class="sig" data-goto="'+sig.s[0]+'" style="--hc2:'+sig.g.c+'">'+sig.g.n+' →</button>' : '');
+    } else pie.hidden = true;
+    if(en) marcarVacios(c);
+    if(en) document.getElementById("form").style.setProperty("--gc", act.g.c);
+  });
+  document.querySelectorAll("#nav > button[data-goto]").forEach(function(b){
+    var id = b.getAttribute("data-goto"), g = grupoDe(id);
+    var x = gs.filter(function(y){ return y.g===g; })[0];
+    b.style.setProperty("--hc", g.c);
+    b.hidden = !x || x.s[0]!==id;
+    b.classList.toggle("on", !!x && x===act);
+  });
+};
+var _pintarHojasG = pintarHojas;
+pintarHojas = function(){ _pintarHojasG(); setTimeout(function(){ document.querySelectorAll("#form > section.card.activa").forEach(marcarVacios); }, 0); };
 var _render = render;
 render = function(){ ordenarHabitos(); _render(); plegarTextos(); pintarHojas();
   document.querySelectorAll("#nav > button[data-goto] .txt").forEach(function(t){ var id = t.parentNode.getAttribute("data-goto"); if(HOJA_CORTO[id]) t.textContent = HOJA_CORTO[id]; });
