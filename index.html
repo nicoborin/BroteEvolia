@@ -369,6 +369,25 @@
     body.hojas #nav > button.on .punto{background:rgba(255,255,255,.7) !important}
   }
   @media (min-width:1600px){ body.hojas #nav > button{font-size:14px;letter-spacing:.02em} }
+
+  body.hojas .curvasEx{column-span:all;display:grid !important;grid-template-columns:1fr 1fr;gap:14px;background:transparent !important;border:0 !important;padding:0 !important}
+  body.hojas .curvasEx[hidden]{display:none !important}
+  body.hojas .curvaEx{border:1px solid color-mix(in srgb,var(--hc) 16%,#ececf0);border-radius:8px;padding:8px 10px;background:#fff}
+  body.hojas .curvaEx svg{width:100%;height:auto;max-height:300px;display:block}
+  body:not(.hojas) .curvasEx{display:none}
+
+  .barra .btn.copiarTop{background:#18181b;border-color:#18181b;color:#fff}
+  .barra .btn.copiarTop:hover{background:#3f3f46;border-color:#3f3f46}
+  .barra .btn.copiarTop.hecho{background:#059669;border-color:#059669}
+
+  /* solapas opción B: color pleno, la activa más ancha */
+  @media (min-width:1181px){
+    body.hojas #nav{gap:3px}
+    body.hojas #nav > button{background:var(--hc);color:#fff;box-shadow:inset 6px 0 6px -5px rgba(0,0,0,.35);width:36px;border-radius:0 9px 9px 0}
+    body.hojas #nav > button:hover{background:color-mix(in srgb,var(--hc) 85%,#000);color:#fff}
+    body.hojas #nav > button.on{width:50px;box-shadow:3px 2px 6px rgba(0,0,0,.18);font-size:15px}
+    body.hojas #nav > button .punto, body.hojas #nav > button.on .punto{background:rgba(255,255,255,.6) !important}
+  }
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2F3A8F">
@@ -401,6 +420,7 @@
     <div class="grupo" id="modoSeg" title="Tipo de consulta"><button data-modoc="completo">Completo</button><button data-modoc="abreviado">Abreviado</button><button data-modoc="demanda">Demanda</button></div>
     <button class="btn" id="btnImportar"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg><span>Importar</span></button>
     <button class="btn" id="btnPanel"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>Plantillas</span></button>
+    <button class="btn copiarTop" id="btnCopiar" title="Pega con las etiquetas subrayadas y los segmentos destacados en negrita donde el destino lo admita, y como texto plano donde no. La marca (!) va en los dos."><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Copiar</span></button>
     <button class="btn fin" id="btnLimpiar"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Finalizar</span></button>
   </div>
 </header>
@@ -454,7 +474,6 @@
         <span id="contador">Evolución</span>
         <span style="display:flex;gap:6px">
           <button class="copiar" id="btnTitulos" style="background:#3f3f46;color:#fff" title="Títulos de sección y líneas en blanco">Títulos</button>
-          <button class="copiar" id="btnCopiar" title="Pega con las etiquetas subrayadas y los segmentos destacados en negrita donde el destino lo admita, y como texto plano donde no. La marca (!) va en los dos.">Copiar</button>
         </span>
       </div>
       <textarea id="salida" readonly></textarea>
@@ -1738,8 +1757,25 @@ pintarHojas = function(){
 };
 var _pintarHojasG = pintarHojas;
 pintarHojas = function(){ _pintarHojasG(); setTimeout(function(){ document.querySelectorAll("#form > section.card.activa").forEach(marcarVacios); }, 0); };
+
+/* curvas de IMC y talla dentro de Examen (OMS 2007), si hay datos */
+function pintarCurvasExamen(){
+  var sec = document.querySelector("#sExamen .cuerpo"); if(!sec) return;
+  var box = document.getElementById("curvasExamen");
+  if(!box){ box = document.createElement("div"); box.id = "curvasExamen"; box.className = "curvasEx";
+    var pie = document.getElementById("pie_sExamen"); sec.insertBefore(box, pie || null); }
+  var a = antro(), ms = meses();
+  if(ms==null || ms < MES_INI || ms >= MES_FIN || (!a.imc && !a.talla)){ box.innerHTML = ""; box.hidden = true; return; }
+  var sx = F.sexo === "F" ? "F" : "M", pv = num(F.prevPeso), pt = num(F.prevTalla), prevMeses = null;
+  if(pt && pt <= 3) pt = pt*100;
+  if(F.prevFecha && F.fn){ prevMeses = ((new Date(F.prevFecha+"T00:00:00") - new Date(F.fn+"T00:00:00"))/86400000)/30.4375; if(!(prevMeses > 0)) prevMeses = null; }
+  var h = "";
+  if(a.talla) h += '<div class="curvaEx"><label>Talla para la edad · OMS 2007</label>' + curvaSVG("hfa", sx, a.talla, ms, (prevMeses && pt) ? {m:prevMeses, v:pt} : null) + '</div>';
+  if(a.imc) h += '<div class="curvaEx"><label>IMC para la edad · OMS 2007</label>' + curvaSVG("bfa", sx, a.imc, ms, (prevMeses && pv && pt) ? {m:prevMeses, v:pv/Math.pow(pt/100,2)} : null) + '</div>';
+  box.innerHTML = h; box.hidden = false;
+}
 var _render = render;
-render = function(){ ordenarHabitos(); _render(); plegarTextos(); pintarHojas();
+render = function(){ ordenarHabitos(); _render(); plegarTextos(); pintarCurvasExamen(); pintarHojas();
   document.querySelectorAll("#nav > button[data-goto] .txt").forEach(function(t){ var id = t.parentNode.getAttribute("data-goto"); if(HOJA_CORTO[id]) t.textContent = HOJA_CORTO[id]; });
 };
 (function(){
@@ -2870,7 +2906,7 @@ function construir(crudo){
 /* Marca "(!)" y etiqueta en mayúsculas, igual en texto plano y con formato;
    con formato, además, el renglón va en negrita. */
 var DEST = {}, DEST_USADOS = 0;
-var DEST_FIJOS = {dx:1, conductas:1, obsConsulta:1};
+var DEST_FIJOS = {dx:1, obsConsulta:1};
 var DEST_AUTO = {
   enfActual: function(){ return alarmasKits().length>0; },
   identidad: function(){ return /Automedicación hormonal/.test(String(F.tratGen||"")); },
@@ -2891,6 +2927,7 @@ var DEST_AUTO = {
     return !!((a.imcC && a.imcC.c!=="ok") || (a.tC && a.tC.c!=="ok") || F.adams==="positivo"
       || (pa && !pa.falta && pa.tono && pa.tono!=="ok"));
   },
+  conductas: function(){ return conductasBase().some(function(x){ return PRIO[x.k]; }); },
   uro: function(){ return F.sexo==="M" && (/Varicocele|Hidrocele|Criptorquidia|Fimosis|Hernia inguinal/i.test(String(F.urologico||"")) || lecturaOrq().alertas.length>0); }
 };
 function destAuto(k){ try { return !!(DEST_AUTO[k] && DEST_AUTO[k]()); } catch(e){ return false; } }
@@ -3667,8 +3704,9 @@ document.getElementById("btnCopiar").onclick = function(){
   var b = this;
   copiarDual();
   var seg = registrarUso("dual");
-  b.textContent = seg===null ? "Copiado" : "Copiado · " + seg + " s"; b.className = "copiar hecho";
-  setTimeout(function(){ b.textContent="Copiar"; b.className="copiar"; }, 2600);
+  var sp = b.querySelector("span") || b;
+  sp.textContent = seg===null ? "Copiado" : "Copiado · " + seg + " s"; b.classList.add("hecho");
+  setTimeout(function(){ sp.textContent="Copiar"; b.classList.remove("hecho"); }, 2600);
 };
 
 document.addEventListener("keydown", function(e){
