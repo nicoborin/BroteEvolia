@@ -2717,8 +2717,17 @@ function construir(crudo){
   var segAct = null, nDest = 0;
   function cierra(){
     if(segAct && destacado(segAct.k) && !DEST_FIJOS[segAct.k] && segAct.L.length > segAct.i) nDest++;
+    var soloPrio = segAct && segAct.k==="conductas" && DEST.conductas===undefined && destAuto("conductas"), enPrio = false;
     if(segAct && destacado(segAct.k))
-      for(var i=segAct.i; i<segAct.L.length; i++) segAct.L[i] = (i===segAct.i ? "\u0001" : "\u0002") + segAct.L[i];
+      for(var i=segAct.i; i<segAct.L.length; i++){
+        var ln = segAct.L[i], marca = i===segAct.i ? "\u0001" : "\u0002";
+        if(soloPrio && i>segAct.i){
+          var sub = !/^  - /.test(ln);
+          if(sub) enPrio = /^  Prioritario:/.test(ln);
+          if(!(sub || enPrio || /^  - \(!\) /.test(ln) || /^  (- )?Próximo control:/.test(ln))) marca = "";
+        }
+        segAct.L[i] = marca + ln;
+      }
     segAct = null;
   }
   function seg(k){ cierra(); segAct = {k:k, L:L, i:L.length}; }
