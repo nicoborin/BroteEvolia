@@ -388,6 +388,43 @@
     body.hojas #nav > button.on{width:50px;box-shadow:3px 2px 6px rgba(0,0,0,.18);font-size:15px}
     body.hojas #nav > button .punto, body.hojas #nav > button.on .punto{background:rgba(255,255,255,.6) !important}
   }
+
+  /* ===== Guía de antecedentes en la columna derecha ===== */
+  #guia{display:none}
+  body.conGuia main > aside > *:not(#guia){display:none !important}
+  body.conGuia #guia{display:block}
+  #guia{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:12px 14px;font-size:13px;color:#27272a;position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto}
+  #guia h3{margin:0 0 2px;font-size:14px;color:#18181b}
+  #guia .gSub{font-size:11.5px;color:#71717a;margin:0 0 10px}
+  #guia .gBloque{margin:0 0 12px}
+  #guia .gTit{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:#52525b;margin:0 0 6px;display:flex;align-items:center;gap:6px}
+  #guia .gTit i{flex:1;height:1px;background:#e4e4e7}
+  #guia .hoy{border-left:4px solid #a1a1aa;background:#fafafa;border-radius:6px;padding:6px 9px;margin:0 0 6px;line-height:1.35}
+  #guia .hoy.rojo{border-color:#dc2626;background:#fef2f2}
+  #guia .hoy.naranja{border-color:#f59e0b;background:#fffbeb}
+  #guia .hoy.ok{border-color:#16a34a;background:#f0fdf4;color:#3f3f46}
+  #guia .hoy b{font-weight:700}
+  #guia .hoy .fu{display:block;font-style:normal;color:#a1a1aa;font-size:10.5px;margin-top:2px}
+  #guia .hoy small{display:block;color:#71717a;font-size:11.5px;margin-top:1px}
+  #guia .gEnf{font-weight:700;font-size:12.5px;margin:8px 0 3px;color:var(--hc,#18181b)}
+  #guia .gIt{display:grid;grid-template-columns:1fr auto;gap:6px;padding:4px 0;border-bottom:1px dashed #f0f0f2;line-height:1.35}
+  #guia .gIt .cat{color:#71717a;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-right:4px}
+  #guia .gIt b[data-recoff]{cursor:pointer;color:#a1a1aa;font-weight:400;padding:0 3px}
+  #guia .gIt b[data-recoff]:hover{color:#dc2626}
+  #guia .gOtras{font-size:12px;color:#52525b}
+  #guia .gOtras button{border:0;background:#f4f4f5;border-radius:999px;padding:2px 9px;margin:2px 3px 0 0;font-size:12px;cursor:pointer}
+  #guia .gFicha{border:0;background:none;color:#2F3A8F;font-size:12px;padding:2px 0;cursor:pointer;text-decoration:underline}
+  #guia .recTodos{font-size:12px;background:#fafafa;border-radius:6px;padding:6px 8px;margin:4px 0}
+  #guia .vacio{color:#71717a;font-size:12.5px}
+  #btnGuia.on{background:#18181b;color:#fff;border-color:#18181b}
+  #btnGuia .n{display:inline-block;min-width:17px;padding:0 5px;margin-left:5px;border-radius:999px;background:#f59e0b;color:#fff;font-size:11px;line-height:17px;text-align:center}
+  body.hojas #nav > button.conRec::after{content:"";position:absolute;left:50%;bottom:7px;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 2px #fff}
+
+  .labMesFila{display:flex;align-items:center;gap:3px;margin-top:6px;flex-wrap:nowrap}
+  .labMesFila .lt{font-size:11px;color:#71717a;margin-right:2px}
+  .labMesFila button{border:1px solid #e4e4e7;background:#fff;border-radius:6px;flex:1;min-width:0;padding:2px 0;font-size:11px;cursor:pointer;color:#3f3f46}
+  .labMesFila button.on{background:var(--hc,#2F3A8F);border-color:var(--hc,#2F3A8F);color:#fff}
+  .labMesFila button:disabled{opacity:.35;cursor:default}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2F3A8F">
@@ -555,7 +592,7 @@ var VACIO = {
   obsAntec:"", obsSocial:"", obsCotidiana:"", obsSexual:"", obsExamen:"",
   obsAlim:"", obsSueno:"", animo:"", obsEscolar:"",
   cursoN:"", cursoTipo:"año", turno:"", noRepitio:"", escEstado:"", egresoAnio:"", estudioTipo:"", estudioQue:"", abandonoCausa:"", rendimiento:"", repitTipo:"grado", trabajo:"", colegio:"",
-  cardioAnio:"", visualAnio:"", labAnio:"",
+  cardioAnio:"", visualAnio:"", labAnio:"", labMes:"",
   actFisica:"", tiempoLibre:"", amigos:"",
   toxicos:"", redes:"",
   txTbq:"", txTbqIni:"", txTbqProb:"", txOh:"", txOhIni:"", txOhCeea:"", txOhProb:"", txThc:"", txThcIni:"", txThcProb:"", txOtr:"", txOtrQue:"", txOtrIni:"", txOtrProb:"", txTbqSoc:"", txTbqSol:"", txOhSoc:"", txOhSol:"", txThcSoc:"", txThcSol:"", txOtrSoc:"", txOtrSol:"", tmpIdeas:"", tmpIdeasTxt:"", tmpAuto:"", tmpAutoTxt:"", tmpAng:"", tmpAngTxt:"", tmpAns:"", tmpAnsTxt:"", tmpTriste:"", tmpTristeTxt:"", tmpIdeasD:"", tmpIdeasDTxt:"", tmpIdeasU:"", tmpIdeasUTxt:"", tmpAutoD:"", tmpAutoDTxt:"", tmpAutoU:"", tmpAutoUTxt:"", tmpAutoFin:"", tmpAutoFinTxt:"", tmpAutoCuida:"", tmpDepD:"", tmpDepDTxt:"", tmpAngD:"", tmpAngDTxt:"", tmpAnsD:"", tmpAnsDTxt:"", tmpTristeD:"", tmpTristeDTxt:"", tmpIdeasDesc:"", tmpIdeasViol:"", tmpAutoDesc:"", tmpAutoViol:"",
@@ -573,7 +610,7 @@ var NO_PLANTILLA = ["modo","genero","idGenero","tratGen","nombreDoc","nombreDni"
   "ultimaConsulta","intercurrencias","enfActual",
   "localidad","nbi","auh","aoG","aoP","aoC","aoA","cursoN","turno","rendimiento","trabajo","noRepitio","escEstado","egresoAnio","estudioTipo","estudioQue","abandonoCausa",
   "apellido","dni","docObs","docEsp","docMotivo","docRp","docTitulo","docCuerpo",
-  "turnoFecha","turnoHora","turnoOficial","colegio","cardioAnio","visualAnio","labAnio",
+  "turnoFecha","turnoHora","turnoOficial","colegio","cardioAnio","visualAnio","labAnio","labMes",
   "obsAntec","obsSocial","obsCotidiana","obsSexual","obsExamen","obsAlim","obsSueno","animo","obsEscolar","obsConsulta",
   "macAco","impFecha","impAprox","diuTipo","diuFecha","diuAprox","gripeOn","gripeAnio","gripeCausa","dengueOn","dengue","dengueAnio",
   "peso","talla","prevPeso","prevTalla","prevFecha","cintura","ta","fum","menarca","telarca","tannerA","tannerVP","orqD","orqI","diagnostico","txTbq","txTbqIni","txTbqProb","txOh","txOhIni","txOhCeea","txOhProb","txThc","txThcIni","txThcProb","txOtr","txOtrQue","txOtrIni","txOtrProb","txTbqSoc","txTbqSol","txOhSoc","txOhSol","txThcSoc","txThcSol","txOtrSoc","txOtrSol","tmpIdeas","tmpIdeasTxt","tmpAuto","tmpAutoTxt","tmpAng","tmpAngTxt","tmpAns","tmpAnsTxt","tmpTriste","tmpTristeTxt","tmpIdeasD","tmpIdeasDTxt","tmpIdeasU","tmpIdeasUTxt","tmpAutoD","tmpAutoDTxt","tmpAutoU","tmpAutoUTxt","tmpAutoFin","tmpAutoFinTxt","tmpAutoCuida","tmpDepD","tmpDepDTxt","tmpAngD","tmpAngDTxt","tmpAnsD","tmpAnsDTxt","tmpTristeD","tmpTristeDTxt","tmpIdeasDesc","tmpIdeasViol","tmpAutoDesc","tmpAutoViol"];
@@ -1800,6 +1837,147 @@ render = function(){ ordenarHabitos(); _render(); plegarTextos(); pintarCurvasEx
     if(!caja.hidden) caja.hidden = true;
   }, true);
 })();
+
+/* ===== Guía de antecedentes (columna derecha) y "Para hoy" ===== */
+/* intervalos de control tomados de las fichas; los revisa Nico antes de publicar */
+var PARA_HOY = [
+  {id:"sindrome_down", lab:12, que:"TSH y T4L, anticuerpos de celiaquía, hemograma y glucemia", cada:"anual", f:"ASDRA 2013; hemograma: AAP 2022", gripe:1, gf:"ASDRA 2013"},
+  {id:"celiaquia", lab:12, que:"anti-tTG IgA", cada:"anual después del primer año", f:"SAP 2024, guía de tratamiento y seguimiento"},
+  {id:"hipotiroidismo", lab:6, que:"TSH y T4L", cada:"cada 4 a 6 meses", f:"SAP 2021, Hipotiroidismo adquirido parte 2"},
+  {id:"dieta_vegetariana_vegana", lab:6, que:"hemograma, ferritina, B12 y vitamina D", cada:"cada 6 meses", f:"SAP 2020, Comité de Nutrición"},
+  {id:"sop", lab:36, que:"glucemia (mejor PTOG)", cada:"cada 1 a 3 años", f:"Guía internacional de SOP 2023"},
+  {id:"obesidad", gripe:1, gf:"SAP 2026"}, {id:"dm1", gripe:1, gf:"SAP 2026"},
+  {id:"asma", gripe:1, gripeNota:"si el asma es moderada o grave", gf:"SAP 2021 y 2026"}];
+function anioConsulta(){ return Number((String(F.fecha||"").match(/^(\d{4})/)||[])[1] || new Date().getFullYear()); }
+function paraHoy(){
+  var act = recActivos().map(function(p){ return p.id; }), y = anioConsulta(), o = [], gripe = [], gfu = [];
+  var la = String(F.labAnio||""), laN = /^\d{4}$/.test(la) ? Number(la) : null;
+  var mc = Number((String(F.fecha||"").match(/^\d{4}-(\d{2})/)||[])[1] || (new Date().getMonth()+1));
+  var lm = laN!==null && F.labMes ? Number(F.labMes) : 0;
+  PARA_HOY.forEach(function(r){
+    if(act.indexOf(r.id)<0) return;
+    var p = REC_AP.filter(function(x){ return x.id===r.id; })[0], n = p ? p.n : r.id;
+    if(r.gripe){ gripe.push(n + (r.gripeNota ? " ("+r.gripeNota+")" : "")); if(gfu.indexOf(n+": "+r.gf)<0) gfu.push(n+": "+r.gf); }
+    if(!r.lab) return;
+    var est, txt;
+    if(!la){ est = "naranja"; txt = "No figura el año del último laboratorio."; }
+    else if(laN===null){ est = "rojo"; txt = "Último laboratorio hace 3 años o más: corresponde."; }
+    else if(lm){
+      var pas = (y*12+mc) - (laN*12+lm), fl = ("0"+lm).slice(-2)+"/"+laN, hace = pas<=0 ? "este mes" : (pas===1 ? "hace 1 mes" : "hace "+pas+" meses");
+      est = pas>=r.lab ? "rojo" : (pas>=r.lab-1 ? "naranja" : "ok");
+      txt = "Último laboratorio "+fl+" ("+hace+"): " + (est==="rojo" ? "corresponde." : (est==="naranja" ? "corresponde el mes que viene." : "al día."));
+    }
+    else {
+      var d = y - laN;
+      if(r.lab<=6){ est = d>=1 ? "rojo" : "naranja"; txt = d>=1 ? "Último laboratorio "+laN+": corresponde." : "Último laboratorio "+laN+": corresponde si pasaron más de 6 meses."; }
+      else if(r.lab<=12){ est = d>=2 ? "rojo" : (d===1 ? "naranja" : "ok"); txt = d>=2 ? "Último laboratorio "+laN+": corresponde." : (d===1 ? "Último laboratorio "+laN+": corresponde si ya pasó un año." : "Laboratorio "+laN+": al día."); }
+      else { est = d>=3 ? "rojo" : "ok"; txt = d>=3 ? "Último laboratorio "+laN+": corresponde." : "Laboratorio "+laN+": dentro del intervalo."; }
+    }
+    o.push({est:est, n:n, que:r.que+" ("+r.cada+")", txt:txt, f:r.f});
+  });
+  if(gripe.length){
+    var ga = String(F.gripeAnio||"");
+    if(ga===String(y)) o.push({est:"ok", n:"Antigripal", que:gripe.join(", "), txt:"Recibió la de "+y+".", f:gfu.join("; ")});
+    else o.push({est:"naranja", n:"Antigripal "+y, que:gripe.join(", "), txt: ga ? (ga==="no recibió" ? "No recibió." : "Última: "+ga+".") : "No está registrada en Vacunas.", f:gfu.join("; ")});
+  }
+  var orden = {rojo:0, naranja:1, ok:2};
+  return o.sort(function(a,b){ return orden[a.est]-orden[b.est]; });
+}
+function pintarGuia(){
+  var g = document.getElementById("guia");
+  if(!g){
+    var as = document.querySelector("main > aside"); if(!as) return;
+    g = document.createElement("div"); g.id = "guia"; as.insertBefore(g, as.firstChild);
+  }
+  var r = recPorSeccion(), act = recActivos(), hoy = paraHoy();
+  var grp = grupoDe(HOJA) || {n:"", s:[HOJA], c:"#18181b"};
+  /* marca en las solapas */
+  var porGrupo = {};
+  Object.keys(r).forEach(function(sid){ var gg = grupoDe(sid); if(gg) porGrupo[gg.n] = (porGrupo[gg.n]||0) + r[sid].length; });
+  document.querySelectorAll("#nav > button[data-goto]").forEach(function(b){
+    var gg = grupoDe(b.getAttribute("data-goto"));
+    b.classList.toggle("conRec", !!(gg && porGrupo[gg.n] && gg.s[0]===b.getAttribute("data-goto")));
+  });
+  var nAlerta = hoy.filter(function(x){ return x.est!=="ok"; }).length;
+  var bg = document.getElementById("btnGuia");
+  if(bg) bg.innerHTML = '<span>Guía</span>' + (act.length && nAlerta ? '<span class="n">'+nAlerta+'</span>' : '');
+  if(!act.length){
+    g.innerHTML = '<h3>Guía de antecedentes</h3><p class="gSub">No se copia a la nota.</p><p class="vacio">Cargá un antecedente personal con sugerencia (asma, celiaquía, hipotiroidismo…) y acá aparece qué corresponde en esta consulta y qué tener en cuenta en cada hoja.</p>';
+    return;
+  }
+  var h = '<h3>Guía de antecedentes</h3><p class="gSub">'+act.map(function(p){ return esc(p.n); }).join(" · ")+' — no se copia a la nota</p>';
+  if(hoy.length) h += '<div class="gBloque"><div class="gTit">Para hoy<i></i></div>'
+    + hoy.map(function(x){ return '<div class="hoy '+x.est+'"><b>'+esc(x.n)+'</b> · '+esc(x.que)+'<small>'+esc(x.txt)+'</small>'+(x.f ? '<em class="fu">Fuente: '+esc(x.f)+'</em>' : '')+'</div>'; }).join("") + '</div>';
+  var items = [];
+  grp.s.forEach(function(sid){ (r[sid]||[]).forEach(function(x){ items.push(x); }); });
+  h += '<div class="gBloque" style="--hc:'+grp.c+'"><div class="gTit">En esta hoja · '+esc(grp.n)+'<i></i></div>';
+  if(items.length){
+    var porEnf = {};
+    items.forEach(function(x){ (porEnf[x.n] = porEnf[x.n] || []).push(x); });
+    Object.keys(porEnf).forEach(function(n){
+      h += '<div class="gEnf">'+esc(n)+'</div>' + porEnf[n].map(function(x){
+        return '<div class="gIt"><span><span class="cat">'+REC_NOM[x.cat]+'</span>'+esc(x.t)+'</span><b data-recoff="'+esc(x.key)+'" title="Descartar">✕</b></div>'; }).join("");
+    });
+  } else h += '<p class="vacio">Nada para esta hoja.</p>';
+  var otras = GRUPOS.filter(function(gg){ return gg.n!==grp.n && porGrupo[gg.n]; });
+  if(otras.length) h += '<div class="gOtras" style="margin-top:8px">También en: ' + otras.map(function(gg){
+    return '<button data-goto="'+gg.s.filter(function(sid){ return (r[sid]||[]).length; })[0]+'">'+esc(gg.n)+' ('+porGrupo[gg.n]+')</button>'; }).join("") + '</div>';
+  h += '</div><div class="gBloque"><div class="gTit">Fichas completas<i></i></div>'
+    + act.map(function(p){ return '<button class="gFicha" data-recver="'+p.id+'">'+(REC_VER[p.id] ? "Ocultar" : "Ver")+' ficha de '+esc(p.n)+'</button>' + (REC_VER[p.id] ? recTodos(p) : ""); }).join("<br>")
+    + '</div>';
+  g.innerHTML = h;
+}
+function vistaDerecha(modo){
+  var b = document.body, bs = document.getElementById("btnSalida"), bg = document.getElementById("btnGuia");
+  var actual = b.classList.contains("conGuia") ? "guia" : (b.classList.contains("conSalida") ? "salida" : "");
+  if(actual===modo) modo = "";
+  b.classList.toggle("conSalida", !!modo);
+  b.classList.toggle("conGuia", modo==="guia");
+  if(bs){ bs.innerHTML = "<span>"+(modo==="salida" ? "Ocultar evolución" : "Ver evolución")+"</span>"; bs.classList.toggle("on", modo==="salida"); }
+  if(bg) bg.classList.toggle("on", modo==="guia");
+}
+(function(){
+  var bs = document.getElementById("btnSalida");
+  if(bs && !document.getElementById("btnGuia")){
+    var bg = document.createElement("button");
+    bg.className = "btn"; bg.id = "btnGuia"; bg.type = "button"; bg.title = "Recordatorios por antecedentes: qué corresponde hoy y qué tener en cuenta en cada hoja. No se copia a la nota.";
+    bg.innerHTML = "<span>Guía</span>";
+    bs.parentNode.insertBefore(bg, bs);
+    bg.onclick = function(){ vistaDerecha("guia"); };
+    bs.onclick = function(){ vistaDerecha("salida"); };
+  }
+})();
+var _renderG = render;
+render = function(){ _renderG(); try{ pintarGuia(); }catch(e){ if(window.console) console.error(e); } };
+
+/* mes del último laboratorio: aparece solo con año actual o anterior y un antecedente con control periódico */
+var MESES_L = ["E","F","M","A","M","J","J","A","S","O","N","D"], MESES_N = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function labMesHace(){
+  if(typeof PARA_HOY==="undefined") return false;
+  var y = anioConsulta(), la = String(F.labAnio||"");
+  if(la!==String(y) && la!==String(y-1)) return false;
+  var act = recActivos().map(function(p){ return p.id; });
+  return PARA_HOY.some(function(r){ return r.lab && act.indexOf(r.id)>=0; });
+}
+function pintarLabMes(){
+  var cont = document.querySelector('[data-anio="labAnio"]'); if(!cont) return;
+  var f = cont.closest(".f"), fila = f.querySelector(".labMesFila");
+  if(!labMesHace()){ if(fila) fila.remove(); return; }
+  if(!fila){ fila = document.createElement("div"); fila.className = "labMesFila"; var ch = f.querySelector(".chips"); f.insertBefore(fila, ch); }
+  var y = anioConsulta(), mc = Number((String(F.fecha||"").match(/^\d{4}-(\d{2})/)||[])[1] || (new Date().getMonth()+1));
+  fila.innerHTML = '<span class="lt">Mes:</span>' + MESES_L.map(function(l, i){
+    var m = i+1, fut = String(F.labAnio)===String(y) && m>mc;
+    return '<button type="button" data-labmes="'+m+'" title="'+MESES_N[i]+'" class="'+(String(F.labMes)===String(m)?"on":"")+'"'+(fut?" disabled":"")+'>'+l+'</button>'; }).join("");
+}
+document.addEventListener("click", function(e){
+  var ya = e.target.closest && e.target.closest('[data-anio="labAnio"][data-v]');
+  if(ya){ F.labMes = ""; return; }
+  var b = e.target.closest && e.target.closest("[data-labmes]"); if(!b || b.disabled) return;
+  var m = b.getAttribute("data-labmes"); F.labMes = String(F.labMes)===m ? "" : m;
+  e.stopPropagation(); render();
+}, true);
+var _renderM = render;
+render = function(){ _renderM(); try{ pintarLabMes(); }catch(err){ if(window.console) console.error(err); } };
 setTimeout(function(){ ponerEstrellas(); marcarAbrev(); if(typeof render==="function") render(); }, 0);
 document.getElementById("nav").innerHTML = SECCIONES.map(function(sec){
   return '<button data-goto="'+sec.id+'" style="--sec:'+COLOR_SEC[sec.id]+'"><span class="punto" id="pt_'+sec.id+'"></span>'
@@ -2780,7 +2958,7 @@ function construir(crudo){
   }
   if(F.visual.trim()) L.push("  Agudeza visual: "+conAnio(F.visual, F.visualAnio));
   if(F.cardio.trim()) L.push("  Valoración cardiológica: "+conAnio(F.cardio, F.cardioAnio));
-  if(F.lab.trim()) L.push("  Último laboratorio: "+conAnio(F.lab, F.labAnio));
+  if(F.lab.trim()) L.push("  Último laboratorio: "+conAnio(F.lab, F.labMes && /^\d{4}$/.test(F.labAnio) ? ("0"+F.labMes).slice(-2)+"/"+F.labAnio : F.labAnio));
   seg("af"); lista("AF", LISTAS.af);
   seg("vacunas"); add("Vacunas",vacunasTexto());
   seg("obsAntec"); add("Otros antecedentes",F.obsAntec);
@@ -4337,8 +4515,10 @@ function importar(txt){
     if(sub){
       var kk = {"Agudeza visual":"visual","Valoración cardiológica":"cardio","Último laboratorio":"lab"}[sub[1]];
       var cuerpoSub = sub[2].trim();
-      var ma = cuerpoSub.match(/\s*\((\d{4}|previo|hace 3 años o más)\)\s*$/);
+      var ma = cuerpoSub.match(/\s*\(((?:\d{1,2}\/)?\d{4}|previo|hace 3 años o más)\)\s*$/);
       if(ma){
+        var mm = ma[1].match(/^(\d{1,2})\/(\d{4})$/);
+        if(mm){ ma[1] = mm[2]; if(kk==="lab") F.labMes = String(Number(mm[1])); }
         F[kk+"Anio"] = /^\d{4}$/.test(ma[1]) ? ma[1] : "previo";
         cuerpoSub = cuerpoSub.slice(0, ma.index).trim();
       }
